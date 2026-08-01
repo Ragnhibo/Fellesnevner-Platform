@@ -1,5 +1,16 @@
 import { useEffect } from "react";
 
+// Copies text to the clipboard, returning true/false so callers can show
+// a "Kopiert!" confirmation or a fallback message.
+export async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 // Sets the browser tab title for whichever page/game is currently mounted,
 // falling back to the base platform title when the component unmounts.
 export function usePageTitle(title) {
