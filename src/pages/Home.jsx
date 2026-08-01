@@ -41,6 +41,13 @@ const GAMES = [
     color: colors.accent,
     available: true,
   },
+  {
+    slug: "/delstatsjakt",
+    title: "Delstatsjakt",
+    tagline: "Lær USAs 50 delstater, hovedsteder og plassering.",
+    color: colors.mint,
+    available: true,
+  },
 ];
 
 function GameCard({ game }) {
