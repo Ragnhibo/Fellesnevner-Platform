@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Delete, RotateCcw } from "lucide-react";
-import { shared, colors, usePageTitle } from "../theme";
+import { Delete, RotateCcw, Share2 } from "lucide-react";
+import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import PageShell from "../components/PageShell";
 
 // Six chalk colors for the code pegs — deliberately distinct from the
@@ -112,6 +112,7 @@ export default function Kodejakt() {
   const [message, setMessage] = useState("");
   const [shake, setShake] = useState(false);
   const [gamesPlayed, setGamesPlayed] = useState(1);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const activeColors = COLOR_OPTIONS.slice(0, cfg.numColors);
 
@@ -123,6 +124,7 @@ export default function Kodejakt() {
     setStatus("playing");
     setMessage("");
     setGamesPlayed((n) => n + 1);
+    setShareCopied(false);
   };
 
   const changeDifficulty = (level) => {
@@ -135,6 +137,27 @@ export default function Kodejakt() {
     resetRound(difficulty);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
+
+  const shareResult = async () => {
+    const grid = guesses
+      .map((g) => {
+        const exactStr = "🟢".repeat(g.exact);
+        const misplacedStr = "🟡".repeat(g.misplaced);
+        const noneStr = "⚪".repeat(cfg.pegs - g.exact - g.misplaced);
+        return exactStr + misplacedStr + noneStr;
+      })
+      .join("\n");
+    const header =
+      status === "won"
+        ? `Kodejakt ${guesses.length}/${cfg.maxGuesses} (${DIFFICULTY[difficulty].label})`
+        : `Kodejakt X/${cfg.maxGuesses} (${DIFFICULTY[difficulty].label})`;
+    const text = `${header}\n${grid}\nfellesnevner.no/kodejakt`;
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
 
   const pickColor = (colorIdx) => {
     if (status !== "playing") return;
@@ -286,9 +309,14 @@ export default function Kodejakt() {
               ))}
             </div>
           )}
-          <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
-            <RotateCcw size={16} style={{ marginRight: 6 }} /> Ny kode
-          </button>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
+              <RotateCcw size={16} style={{ marginRight: 6 }} /> Ny kode
+            </button>
+            <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
+              <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
+            </button>
+          </div>
         </div>
       )}
     </PageShell>

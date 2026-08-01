@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Shuffle, RotateCcw, X, Trophy } from "lucide-react";
+import { Shuffle, RotateCcw, X, Trophy, Share2 } from "lucide-react";
 import { supabase } from "../supabaseClient";
-import { shared, colors, usePageTitle } from "../theme";
+import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import PageShell from "../components/PageShell";
 
 // ---------- Puzzle bank, grouped by difficulty ----------
@@ -289,6 +289,8 @@ export default function Ordspill() {
   const [message, setMessage] = useState("");
   const [shakeIds, setShakeIds] = useState([]);
   const [gamesPlayed, setGamesPlayed] = useState(1);
+  const [guessHistory, setGuessHistory] = useState([]);
+  const [shareCopied, setShareCopied] = useState(false);
   const [status, setStatus] = useState("playing");
 
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -338,6 +340,24 @@ export default function Ordspill() {
     finalTimeRef.current = null;
     setNickname("");
     setScoreSaved(false);
+    setGuessHistory([]);
+    setShareCopied(false);
+  };
+
+  const TIER_EMOJI = ["🟨", "🟩", "🟦", "🟪"];
+
+  const shareResult = async () => {
+    const grid = guessHistory.map((row) => row.map((tier) => TIER_EMOJI[tier]).join("")).join("\n");
+    const header =
+      status === "won"
+        ? `Ordspill (${DIFFICULTY[difficulty].label}) — ${mistakes} feil`
+        : `Ordspill (${DIFFICULTY[difficulty].label}) — ikke løst`;
+    const text = `${header}\n${grid}\nfellesnevner.no/ordspill`;
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
   };
 
   const startNewGame = useCallback(() => {
@@ -385,6 +405,7 @@ export default function Ordspill() {
     if (selected.length !== 4 || status !== "playing") return;
     const tier = selected[0].tier;
     const allSameTier = selected.every((t) => t.tier === tier);
+    setGuessHistory((prev) => [...prev, selected.map((t) => t.tier)]);
 
     if (allSameTier) {
       const newFound = [...found, tier];
@@ -619,6 +640,9 @@ export default function Ordspill() {
                   <Trophy size={16} style={{ marginRight: 6 }} /> Topplisten
                 </button>
               )}
+              <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
+                <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
+              </button>
             </div>
           </div>
         )}

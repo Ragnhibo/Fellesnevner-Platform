@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Delete } from "lucide-react";
-import { shared, colors, usePageTitle } from "../theme";
+import { Delete, Share2 } from "lucide-react";
+import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import PageShell from "../components/PageShell";
 
 // The curated pool of common, everyday words the game picks its answer
@@ -638,6 +638,7 @@ export default function Ordjakt() {
   const [message, setMessage] = useState("");
   const [shake, setShake] = useState(false);
   const [gamesPlayed, setGamesPlayed] = useState(1);
+  const [shareCopied, setShareCopied] = useState(false);
   const messageTimeout = useRef(null);
 
   const letterStatus = {}; // best known status per letter, for keyboard coloring
@@ -664,7 +665,22 @@ export default function Ordjakt() {
     setStatus("playing");
     setMessage("");
     setGamesPlayed((n) => n + 1);
+    setShareCopied(false);
   }, []);
+
+  const shareResult = async () => {
+    const emojiMap = { correct: "🟩", present: "🟨", absent: "⬛" };
+    const grid = guesses
+      .map((g) => evaluateGuess(g, target).map((s) => emojiMap[s]).join(""))
+      .join("\n");
+    const header = status === "won" ? `Ordjakt ${guesses.length}/${MAX_GUESSES}` : `Ordjakt X/${MAX_GUESSES}`;
+    const text = `${header}\n${grid}\nfellesnevner.no/ordjakt`;
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
 
   const handleLetter = useCallback((letter) => {
     setCurrentGuess((prev) => (prev.length < WORD_LEN ? prev + letter : prev));
@@ -771,9 +787,14 @@ export default function Ordjakt() {
               ? `Løst på ${guesses.length} ${guesses.length === 1 ? "forsøk" : "forsøk"}!`
               : `Ordet var ${target}.`}
           </p>
-          <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
-            Nytt ord
-          </button>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
+              Nytt ord
+            </button>
+            <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
+              <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
+            </button>
+          </div>
         </div>
       )}
 
@@ -865,6 +886,7 @@ const styles = {
     cursor: "pointer",
   },
   btnPrimary: { background: "#E8C15A", color: "#16221A" },
+  btnGhost: { background: "transparent", border: "1.5px dashed rgba(237,237,224,0.4)", color: "#EDEDE0" },
   keyboard: { display: "flex", flexDirection: "column", gap: 6, marginTop: 14, alignItems: "center" },
   keyRow: { display: "flex", gap: 5, justifyContent: "center" },
   key: {
