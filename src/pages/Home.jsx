@@ -34,6 +34,13 @@ const GAMES = [
     color: colors.pink,
     available: true,
   },
+  {
+    slug: "/bokstavjakt",
+    title: "Bokstavjakt",
+    tagline: "Finn så mange land og hovedsteder du kan på tid.",
+    color: colors.accent,
+    available: true,
+  },
 ];
 
 function GameCard({ game }) {
