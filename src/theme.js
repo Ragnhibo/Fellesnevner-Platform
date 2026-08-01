@@ -1,5 +1,17 @@
 import { useEffect } from "react";
 
+// Normalizes text for lenient answer comparison: lowercase, strips accents
+// (so "bogota" matches "Bogotá"), strips punctuation. Used by any game
+// that accepts free-text answers.
+export function normalizeText(s) {
+  return s
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9æøå ]/g, "");
+}
+
 // Copies text to the clipboard, returning true/false so callers can show
 // a "Kopiert!" confirmation or a fallback message.
 export async function copyToClipboard(text) {
