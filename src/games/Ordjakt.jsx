@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Delete } from "lucide-react";
-import { shared, colors } from "../theme";
+import { shared, colors, usePageTitle } from "../theme";
 import PageShell from "../components/PageShell";
 
 // The curated pool of common, everyday words the game picks its answer
@@ -630,6 +630,7 @@ function Tile({ letter, status, delay, filled }) {
 }
 
 export default function Ordjakt() {
+  usePageTitle("Ordjakt");
   const [target, setTarget] = useState(() => pickWord(null));
   const [guesses, setGuesses] = useState([]);
   const [currentGuess, setCurrentGuess] = useState("");

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect, useRef } from "react"
 import { Link } from "react-router-dom";
 import { Shuffle, RotateCcw, X, Trophy } from "lucide-react";
 import { supabase } from "../supabaseClient";
-import { shared, colors } from "../theme";
+import { shared, colors, usePageTitle } from "../theme";
 import PageShell from "../components/PageShell";
 
 // ---------- Puzzle bank, grouped by difficulty ----------
@@ -274,6 +274,7 @@ function FractionReveal({ words, label, color, delay }) {
 }
 
 export default function Ordspill() {
+  usePageTitle("Ordspill");
   const [difficulty, setDifficulty] = useState("middels");
   const [puzzleIdx, setPuzzleIdx] = useState(() =>
     Math.floor(Math.random() * POOLS["middels"].length)

@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Delete, RotateCcw } from "lucide-react";
-import { shared, colors } from "../theme";
+import { shared, colors, usePageTitle } from "../theme";
 import PageShell from "../components/PageShell";
 
 // Six chalk colors for the code pegs — deliberately distinct from the
@@ -102,6 +102,7 @@ function FeedbackDots({ exact, misplaced, pegs }) {
 }
 
 export default function Kodejakt() {
+  usePageTitle("Kodejakt");
   const [difficulty, setDifficulty] = useState("middels");
   const cfg = DIFFICULTY[difficulty];
   const [secret, setSecret] = useState(() => generateSecret(cfg.pegs, cfg.numColors));
