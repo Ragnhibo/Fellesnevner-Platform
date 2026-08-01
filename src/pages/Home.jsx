@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { shared, colors } from "../theme";
+import { shared, colors, usePageTitle } from "../theme";
 import Logo from "../components/Logo";
 import PageShell from "../components/PageShell";
 
@@ -25,6 +25,13 @@ const GAMES = [
     title: "Kodejakt",
     tagline: "Knekk fargekoden — logikk, ikke flaks.",
     color: colors.blue,
+    available: true,
+  },
+  {
+    slug: "/hovedstadsjakt",
+    title: "Hovedstadsjakt",
+    tagline: "Gjett verdens hovedsteder — lær mens du spiller.",
+    color: colors.pink,
     available: true,
   },
 ];
@@ -54,6 +61,7 @@ function GameCard({ game }) {
 }
 
 export default function Home() {
+  usePageTitle(null);
   return (
     <PageShell>
       <div style={shared.header}>
