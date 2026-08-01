@@ -22,15 +22,17 @@ function firstLetter(s) {
 }
 
 function pickRound(cfg) {
-  const pool = getPool(cfg);
+  const letterPool = getPool(cfg); // used only to pick a letter with enough well-known options
   const field = cfg.fields[Math.floor(Math.random() * cfg.fields.length)];
   const counts = {};
   NORWEGIAN_LETTERS.forEach((l) => {
-    counts[l] = pool.filter((e) => firstLetter(e[field]) === l).length;
+    counts[l] = letterPool.filter((e) => firstLetter(e[field]) === l).length;
   });
   const candidates = NORWEGIAN_LETTERS.filter((l) => counts[l] >= cfg.required);
   const letter = candidates[Math.floor(Math.random() * candidates.length)];
-  const validEntries = pool.filter((e) => firstLetter(e[field]) === letter);
+  // Validate against the FULL country list — any real, correct answer counts,
+  // not just the smaller "well-known" subset used above to pick a fair letter.
+  const validEntries = COUNTRIES.filter((e) => firstLetter(e[field]) === letter);
   return { field, letter, validEntries };
 }
 
