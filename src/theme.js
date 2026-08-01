@@ -1,3 +1,17 @@
+import { useEffect } from "react";
+
+// Sets the browser tab title for whichever page/game is currently mounted,
+// falling back to the base platform title when the component unmounts.
+export function usePageTitle(title) {
+  useEffect(() => {
+    const prev = document.title;
+    document.title = title ? `${title} – Fellesnevner` : "Fellesnevner";
+    return () => {
+      document.title = prev;
+    };
+  }, [title]);
+}
+
 // Shared chalkboard theme tokens — reused by the homepage and every game
 // so a new game automatically looks like part of the same platform.
 
