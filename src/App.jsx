@@ -7,6 +7,7 @@ import Ordspill from "./games/Ordspill";
 import Ordjakt from "./games/Ordjakt";
 import Kodejakt from "./games/Kodejakt";
 import Hovedstadsjakt from "./games/Hovedstadsjakt";
+import Bokstavjakt from "./games/Bokstavjakt";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/ordjakt" element={<Ordjakt />} />
         <Route path="/kodejakt" element={<Kodejakt />} />
         <Route path="/hovedstadsjakt" element={<Hovedstadsjakt />} />
+        <Route path="/bokstavjakt" element={<Bokstavjakt />} />
       </Routes>
       <Analytics />
     </BrowserRouter>
