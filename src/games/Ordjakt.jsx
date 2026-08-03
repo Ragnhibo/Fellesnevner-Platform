@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Delete, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
 // The curated pool of common, everyday words the game picks its answer
 // from — kept separate from the full dictionary below so answers stay
@@ -563,6 +564,7 @@ const VALID_GUESSES = new Set([
 ]);
 
 const MAX_GUESSES = 6;
+const LEADERBOARD_TIERS = { standard: { label: "Alle" } };
 const WORD_LEN = 5;
 
 const KEY_ROWS = [
@@ -787,10 +789,18 @@ export default function Ordjakt() {
               ? `Løst på ${guesses.length} ${guesses.length === 1 ? "forsøk" : "forsøk"}!`
               : `Ordet var ${target}.`}
           </p>
+          {status === "won" && <SaveScoreRow game="ordjakt" difficulty="standard" score={guesses.length} />}
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               Nytt ord
             </button>
+            <Leaderboard
+              game="ordjakt"
+              difficulties={LEADERBOARD_TIERS}
+              initialDifficulty="standard"
+              ascending={true}
+              unit=" forsøk"
+            />
             <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
               <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
             </button>

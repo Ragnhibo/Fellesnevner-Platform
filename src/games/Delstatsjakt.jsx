@@ -4,6 +4,7 @@ import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard, normalizeText } from "../theme";
 import { STATES, GRID_ROWS, GRID_COLS } from "../data/states";
 import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
 const ROUND_LENGTH = 10;
 
@@ -285,10 +286,18 @@ export default function Delstatsjakt() {
           <p style={styles.endText}>
             Du fikk {correctCount} av {ROUND_LENGTH} riktig!
           </p>
+          <SaveScoreRow game="delstatsjakt" difficulty={difficulty} score={correctCount} />
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt sett
             </button>
+            <Leaderboard
+              game="delstatsjakt"
+              difficulties={DIFFICULTY}
+              initialDifficulty={difficulty}
+              ascending={false}
+              unit=" riktige"
+            />
             <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
               <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
             </button>

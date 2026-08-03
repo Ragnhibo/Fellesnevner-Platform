@@ -4,6 +4,7 @@ import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard, normalizeText } from "../theme";
 import { COUNTRIES } from "../data/countries";
 import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
 const ROUND_LENGTH = 10;
 
@@ -246,6 +247,8 @@ export default function Hovedstadsjakt() {
             Du fikk {correctCount} av {ROUND_LENGTH} riktig!
           </p>
 
+          <SaveScoreRow game="hovedstadsjakt" difficulty={difficulty} score={correctCount} />
+
           <div style={styles.reviewList}>
             {round.map((q, i) => {
               const correct = results[i];
@@ -270,6 +273,13 @@ export default function Hovedstadsjakt() {
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt sett
             </button>
+            <Leaderboard
+              game="hovedstadsjakt"
+              difficulties={DIFFICULTY}
+              initialDifficulty={difficulty}
+              ascending={false}
+              unit=" riktige"
+            />
             <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
               <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
             </button>

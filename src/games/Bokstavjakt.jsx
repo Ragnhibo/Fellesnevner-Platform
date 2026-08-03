@@ -4,6 +4,7 @@ import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard, normalizeText } from "../theme";
 import { COUNTRIES } from "../data/countries";
 import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
 const NORWEGIAN_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅ".split("");
 
@@ -228,6 +229,8 @@ export default function Bokstavjakt() {
                 : `Tiden løp ut — du fant ${found.length} av ${cfg.required}.`}
             </p>
 
+            <SaveScoreRow game="bokstavjakt" difficulty={difficulty} score={found.length} />
+
             <p style={styles.revealLabel}>Alle gyldige svar på «{round.letter}»:</p>
             <div style={styles.chipRow}>
               {round.validEntries.map((e, i) => {
@@ -251,6 +254,13 @@ export default function Bokstavjakt() {
               <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
                 <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt forsøk
               </button>
+              <Leaderboard
+                game="bokstavjakt"
+                difficulties={DIFFICULTY}
+                initialDifficulty={difficulty}
+                ascending={false}
+                unit=" funnet"
+              />
               <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
                 <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
               </button>

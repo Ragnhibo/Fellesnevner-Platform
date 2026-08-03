@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
 const DIFFICULTY = {
   lett: { label: "Lett", seconds: 60, ops: ["+", "-"], addMax: 20, subMax: 20, mulMax: 0, divMax: 0 },
@@ -204,10 +205,18 @@ export default function Regnejakt() {
             <p style={styles.endText}>
               regnestykker løst på {cfg.seconds} sekunder ({cfg.label})
             </p>
+            <SaveScoreRow game="regnejakt" difficulty={difficulty} score={score} />
             <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginTop: 14 }}>
               <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
                 <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt forsøk
               </button>
+              <Leaderboard
+                game="regnejakt"
+                difficulties={DIFFICULTY}
+                initialDifficulty={difficulty}
+                ascending={false}
+                unit=" poeng"
+              />
               <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
                 <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
               </button>

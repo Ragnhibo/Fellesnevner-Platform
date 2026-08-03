@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Delete, RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
 // Six chalk colors for the code pegs — deliberately distinct from the
 // mint/yellow used for feedback below, so the two systems never blend
@@ -317,10 +318,18 @@ export default function Kodejakt() {
               ))}
             </div>
           )}
+          {status === "won" && <SaveScoreRow game="kodejakt" difficulty={difficulty} score={guesses.length} />}
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               <RotateCcw size={16} style={{ marginRight: 6 }} /> Ny kode
             </button>
+            <Leaderboard
+              game="kodejakt"
+              difficulties={DIFFICULTY}
+              initialDifficulty={difficulty}
+              ascending={true}
+              unit=" forsøk"
+            />
             <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
               <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
             </button>
