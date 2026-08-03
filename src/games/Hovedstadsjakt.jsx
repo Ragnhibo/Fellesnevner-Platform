@@ -67,6 +67,7 @@ export default function Hovedstadsjakt() {
   const [round, setRound] = useState(() => buildRound(pool, DIFFICULTY[difficulty].type));
   const [qIndex, setQIndex] = useState(0);
   const [results, setResults] = useState([]); // array of booleans
+  const [userAnswers, setUserAnswers] = useState([]); // what the player actually answered, per question
   const [selectedOption, setSelectedOption] = useState(null);
   const [textAnswer, setTextAnswer] = useState("");
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
@@ -81,6 +82,7 @@ export default function Hovedstadsjakt() {
     setRound(buildRound(nextPool, DIFFICULTY[level].type));
     setQIndex(0);
     setResults([]);
+    setUserAnswers([]);
     setSelectedOption(null);
     setTextAnswer("");
     setFeedback(null);
@@ -100,9 +102,10 @@ export default function Hovedstadsjakt() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
 
-  const advance = (wasCorrect) => {
+  const advance = (wasCorrect, givenAnswer) => {
     const nextResults = [...results, wasCorrect];
     setResults(nextResults);
+    setUserAnswers((prev) => [...prev, givenAnswer]);
     setTimeout(() => {
       setFeedback(null);
       setSelectedOption(null);
@@ -120,14 +123,14 @@ export default function Hovedstadsjakt() {
     const correct = opt === current.answer;
     setSelectedOption(opt);
     setFeedback(correct ? "correct" : "wrong");
-    advance(correct);
+    advance(correct, opt);
   };
 
   const submitText = () => {
     if (feedback || !textAnswer.trim()) return;
     const correct = normalizeText(textAnswer) === normalizeText(current.answer);
     setFeedback(correct ? "correct" : "wrong");
-    advance(correct);
+    advance(correct, textAnswer.trim());
   };
 
   const shareResult = async () => {
@@ -242,6 +245,27 @@ export default function Hovedstadsjakt() {
           <p style={styles.endText}>
             Du fikk {correctCount} av {ROUND_LENGTH} riktig!
           </p>
+
+          <div style={styles.reviewList}>
+            {round.map((q, i) => {
+              const correct = results[i];
+              return (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.reviewRow,
+                    borderColor: correct ? "rgba(143,201,138,0.4)" : "rgba(217,143,160,0.4)",
+                  }}
+                >
+                  <span style={styles.reviewPrompt}>{q.prompt}</span>
+                  <span style={{ ...styles.reviewAnswer, color: correct ? colors.mint : colors.pink }}>
+                    {correct ? `✓ ${q.answer}` : `✗ Riktig: ${q.answer}${userAnswers[i] ? ` (du svarte: ${userAnswers[i]})` : ""}`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt sett
@@ -332,4 +356,24 @@ const styles = {
   btnPrimary: { background: "#E8C15A", color: "#16221A" },
   endBanner: { textAlign: "center", marginTop: 10 },
   endText: { color: "#EDEDE0", fontSize: 15, marginBottom: 12, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 },
+  reviewList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    marginBottom: 16,
+    maxHeight: "44vh",
+    overflowY: "auto",
+    textAlign: "left",
+  },
+  reviewRow: {
+    border: "1.5px solid",
+    borderRadius: 8,
+    padding: "8px 12px",
+    background: "rgba(237,237,224,0.03)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+  },
+  reviewPrompt: { color: "#B9C4B4", fontSize: 12.5, fontFamily: "'IBM Plex Sans', sans-serif" },
+  reviewAnswer: { fontSize: 13, fontWeight: 600, fontFamily: "'IBM Plex Sans', sans-serif" },
 };
