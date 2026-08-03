@@ -62,18 +62,9 @@ function Peg({ colorIdx, empty, size = 40 }) {
         borderRadius: "50%",
         border: empty ? "2px dashed rgba(237,237,224,0.3)" : "2px solid rgba(0,0,0,0.15)",
         background: opt ? opt.hex : "rgba(237,237,224,0.03)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontSize: size * 0.32,
-        fontWeight: 700,
-        color: opt && (opt.id === "hvit" || opt.id === "rosa") ? "#16221A" : "#16221A",
-        fontFamily: "'IBM Plex Sans', sans-serif",
         flexShrink: 0,
       }}
-    >
-      {opt ? opt.short : ""}
-    </div>
+    />
   );
 }
 
@@ -97,6 +88,21 @@ function FeedbackDots({ exact, misplaced, pegs }) {
           }}
         />
       ))}
+    </div>
+  );
+}
+
+function Legend() {
+  return (
+    <div style={styles.legend}>
+      <span style={styles.legendItem}>
+        <span style={{ ...styles.legendDot, background: colors.mint }} />
+        Riktig farge og plass
+      </span>
+      <span style={styles.legendItem}>
+        <span style={{ ...styles.legendDot, background: colors.accent }} />
+        Riktig farge, feil plass
+      </span>
     </div>
   );
 }
@@ -238,6 +244,8 @@ export default function Kodejakt() {
         </span>
       </div>
 
+      <Legend />
+
       <div style={styles.history}>
         {guesses.map((g, i) => (
           <div key={i} style={styles.historyRow}>
@@ -344,6 +352,22 @@ const styles = {
     cursor: "pointer",
     minHeight: 36,
   },
+  legend: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 16,
+    flexWrap: "wrap",
+    marginBottom: 12,
+  },
+  legendItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 11.5,
+    color: "#8FA089",
+    fontFamily: "'IBM Plex Sans', sans-serif",
+  },
+  legendDot: { width: 10, height: 10, borderRadius: "50%", flexShrink: 0 },
   history: { display: "flex", flexDirection: "column", gap: 8, marginBottom: 12, maxHeight: "38vh", overflowY: "auto" },
   historyRow: {
     display: "flex",
