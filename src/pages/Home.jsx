@@ -48,6 +48,13 @@ const GAMES = [
     color: colors.mint,
     available: true,
   },
+  {
+    slug: "/regnejakt",
+    title: "Regnejakt",
+    tagline: "Løs så mange regnestykker du kan på 60 sekunder.",
+    color: colors.blue,
+    available: true,
+  },
 ];
 
 function GameCard({ game }) {
