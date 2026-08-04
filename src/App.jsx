@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { GLOBAL_CSS } from "./theme";
 import Home from "./pages/Home";
+import Topplister from "./pages/Topplister";
 import Ordspill from "./games/Ordspill";
 import Ordjakt from "./games/Ordjakt";
 import Kodejakt from "./games/Kodejakt";
@@ -20,6 +21,7 @@ export default function App() {
       <style>{GLOBAL_CSS}</style>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/topplister" element={<Topplister />} />
         <Route path="/ordspill" element={<Ordspill />} />
         <Route path="/ordjakt" element={<Ordjakt />} />
         <Route path="/kodejakt" element={<Kodejakt />} />
