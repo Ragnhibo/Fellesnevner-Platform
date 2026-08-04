@@ -69,6 +69,13 @@ const GAMES = [
     color: colors.accent,
     available: true,
   },
+  {
+    slug: "/kryptojakt",
+    title: "Kryptojakt",
+    tagline: "Kryptiske hint — anagram og skjulte ord.",
+    color: colors.mint,
+    available: true,
+  },
 ];
 
 function GameCard({ game }) {
