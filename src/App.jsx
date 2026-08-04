@@ -14,6 +14,7 @@ import Regnejakt from "./games/Regnejakt";
 import Flaggjakt from "./games/Flaggjakt";
 import Sekvensjakt from "./games/Sekvensjakt";
 import Kryptojakt from "./games/Kryptojakt";
+import Vinjakt from "./games/Vinjakt";
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
         <Route path="/flaggjakt" element={<Flaggjakt />} />
         <Route path="/sekvensjakt" element={<Sekvensjakt />} />
         <Route path="/kryptojakt" element={<Kryptojakt />} />
+        <Route path="/vinjakt" element={<Vinjakt />} />
       </Routes>
       <Analytics />
     </BrowserRouter>
