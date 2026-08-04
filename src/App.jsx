@@ -10,6 +10,8 @@ import Hovedstadsjakt from "./games/Hovedstadsjakt";
 import Bokstavjakt from "./games/Bokstavjakt";
 import Delstatsjakt from "./games/Delstatsjakt";
 import Regnejakt from "./games/Regnejakt";
+import Flaggjakt from "./games/Flaggjakt";
+import Sekvensjakt from "./games/Sekvensjakt";
 
 export default function App() {
   return (
@@ -24,6 +26,8 @@ export default function App() {
         <Route path="/bokstavjakt" element={<Bokstavjakt />} />
         <Route path="/delstatsjakt" element={<Delstatsjakt />} />
         <Route path="/regnejakt" element={<Regnejakt />} />
+        <Route path="/flaggjakt" element={<Flaggjakt />} />
+        <Route path="/sekvensjakt" element={<Sekvensjakt />} />
       </Routes>
       <Analytics />
     </BrowserRouter>
