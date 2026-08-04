@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard, normalizeText } from "../theme";
@@ -104,6 +104,8 @@ export default function Delstatsjakt() {
   const [status, setStatus] = useState("playing");
   const [gamesPlayed, setGamesPlayed] = useState(1);
   const [shareCopied, setShareCopied] = useState(false);
+  const [finalTime, setFinalTime] = useState(null);
+  const startTimeRef = useRef(Date.now());
 
   const current = round[qIndex];
 
@@ -117,6 +119,8 @@ export default function Delstatsjakt() {
     setStatus("playing");
     setGamesPlayed((n) => n + 1);
     setShareCopied(false);
+    setFinalTime(null);
+    startTimeRef.current = Date.now();
   };
 
   const changeDifficulty = (level) => {
@@ -138,6 +142,7 @@ export default function Delstatsjakt() {
       setHighlight(null);
       setTextAnswer("");
       if (qIndex + 1 >= round.length) {
+        setFinalTime((Date.now() - startTimeRef.current) / 1000);
         setStatus("done");
       } else {
         setQIndex((i) => i + 1);
@@ -286,7 +291,7 @@ export default function Delstatsjakt() {
           <p style={styles.endText}>
             Du fikk {correctCount} av {ROUND_LENGTH} riktig!
           </p>
-          <SaveScoreRow game="delstatsjakt" difficulty={difficulty} score={correctCount} />
+          <SaveScoreRow game="delstatsjakt" difficulty={difficulty} score={correctCount} timeSeconds={finalTime} />
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt sett
@@ -297,6 +302,7 @@ export default function Delstatsjakt() {
               initialDifficulty={difficulty}
               ascending={false}
               unit=" riktige"
+              showTime
             />
             <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
               <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}

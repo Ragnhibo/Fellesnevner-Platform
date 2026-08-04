@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
@@ -100,6 +100,8 @@ export default function Sekvensjakt() {
   const [status, setStatus] = useState("playing"); // playing | done
   const [gamesPlayed, setGamesPlayed] = useState(1);
   const [shareCopied, setShareCopied] = useState(false);
+  const [finalTime, setFinalTime] = useState(null);
+  const startTimeRef = useRef(Date.now());
 
   const current = round[qIndex];
 
@@ -113,6 +115,8 @@ export default function Sekvensjakt() {
     setStatus("playing");
     setGamesPlayed((n) => n + 1);
     setShareCopied(false);
+    setFinalTime(null);
+    startTimeRef.current = Date.now();
   };
 
   const changeDifficulty = (level) => {
@@ -137,6 +141,7 @@ export default function Sekvensjakt() {
       setFeedback(null);
       setTextAnswer("");
       if (qIndex + 1 >= round.length) {
+        setFinalTime((Date.now() - startTimeRef.current) / 1000);
         setStatus("done");
       } else {
         setQIndex((i) => i + 1);
@@ -237,7 +242,7 @@ export default function Sekvensjakt() {
             Du fikk {correctCount} av {ROUND_LENGTH} riktig!
           </p>
 
-          <SaveScoreRow game="sekvensjakt" difficulty={difficulty} score={correctCount} />
+          <SaveScoreRow game="sekvensjakt" difficulty={difficulty} score={correctCount} timeSeconds={finalTime} />
 
           <div style={styles.reviewList}>
             {round.map((q, i) => {
@@ -269,6 +274,7 @@ export default function Sekvensjakt() {
               initialDifficulty={difficulty}
               ascending={false}
               unit=" riktige"
+              showTime
             />
             <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
               <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
