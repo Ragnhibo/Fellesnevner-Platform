@@ -10,12 +10,14 @@ export function SaveScoreRow({ game, difficulty, score }) {
   const [nickname, setNickname] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   if (!supabase) return null;
 
   const save = async () => {
     if (!nickname.trim() || saving) return;
     setSaving(true);
+    setErrorMsg("");
     const { error } = await supabase.from("scores").insert({
       game,
       nickname: nickname.trim().slice(0, 24),
@@ -23,7 +25,11 @@ export function SaveScoreRow({ game, difficulty, score }) {
       score,
     });
     setSaving(false);
-    if (!error) setSaved(true);
+    if (error) {
+      setErrorMsg(error.message || "Ukjent feil ved lagring.");
+    } else {
+      setSaved(true);
+    }
   };
 
   if (saved) {
@@ -31,23 +37,26 @@ export function SaveScoreRow({ game, difficulty, score }) {
   }
 
   return (
-    <div style={styles.saveRow}>
-      <input
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && save()}
-        placeholder="Kallenavn"
-        maxLength={24}
-        style={styles.input}
-      />
-      <button
-        style={{ ...styles.btn, ...styles.btnPrimary, opacity: nickname.trim() ? 1 : 0.5 }}
-        className="rt-btn"
-        onClick={save}
-        disabled={!nickname.trim() || saving}
-      >
-        {saving ? "Lagrer…" : "Lagre"}
-      </button>
+    <div>
+      <div style={styles.saveRow}>
+        <input
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && save()}
+          placeholder="Kallenavn"
+          maxLength={24}
+          style={styles.input}
+        />
+        <button
+          style={{ ...styles.btn, ...styles.btnPrimary, opacity: nickname.trim() ? 1 : 0.5 }}
+          className="rt-btn"
+          onClick={save}
+          disabled={!nickname.trim() || saving}
+        >
+          {saving ? "Lagrer…" : "Lagre"}
+        </button>
+      </div>
+      {errorMsg && <p style={styles.errorText}>Kunne ikke lagre: {errorMsg}</p>}
     </div>
   );
 }
@@ -151,6 +160,7 @@ export default function Leaderboard({ game, difficulties, initialDifficulty, asc
 const styles = {
   saveRow: { display: "flex", gap: 8, justifyContent: "center", marginBottom: 10, flexWrap: "wrap" },
   savedText: { color: "#8FC98A", fontSize: 13, marginBottom: 8 },
+  errorText: { color: "#D98FA0", fontSize: 12.5, marginTop: 6, marginBottom: 4 },
   input: {
     background: "rgba(237,237,224,0.05)",
     border: "1.5px dashed rgba(237,237,224,0.4)",
