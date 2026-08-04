@@ -6,7 +6,7 @@ import { colors } from "../theme";
 // Inline nickname input + save button, meant to sit inside a game's
 // end-of-round banner right after the result is known. Renders nothing
 // if Supabase isn't configured (e.g. running locally without .env yet).
-export function SaveScoreRow({ game, difficulty, score }) {
+export function SaveScoreRow({ game, difficulty, score, timeSeconds }) {
   const [nickname, setNickname] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -18,12 +18,16 @@ export function SaveScoreRow({ game, difficulty, score }) {
     if (!nickname.trim() || saving) return;
     setSaving(true);
     setErrorMsg("");
-    const { error } = await supabase.from("scores").insert({
+    const payload = {
       game,
       nickname: nickname.trim().slice(0, 24),
       difficulty,
       score,
-    });
+    };
+    if (timeSeconds !== undefined && timeSeconds !== null) {
+      payload.time_seconds = timeSeconds;
+    }
+    const { error } = await supabase.from("scores").insert(payload);
     setSaving(false);
     if (error) {
       setErrorMsg(error.message || "Ukjent feil ved lagring.");
@@ -61,11 +65,18 @@ export function SaveScoreRow({ game, difficulty, score }) {
   );
 }
 
+function formatTime(seconds) {
+  const s = Math.round(seconds);
+  const m = Math.floor(s / 60);
+  const rem = s % 60;
+  return `${m}:${rem.toString().padStart(2, "0")}`;
+}
+
 // Trophy button that opens a modal with per-difficulty top-10. Pass
 // ascending=true when a lower score is better (guesses, time), false when
 // higher is better (correct answers, points). `unit` is appended after the
 // number, e.g. " forsøk" or " riktige".
-export default function Leaderboard({ game, difficulties, initialDifficulty, ascending, unit = "" }) {
+export default function Leaderboard({ game, difficulties, initialDifficulty, ascending, unit = "", showTime = false }) {
   const [open, setOpen] = useState(false);
   const [diff, setDiff] = useState(initialDifficulty);
   const [scores, setScores] = useState([]);
@@ -75,17 +86,20 @@ export default function Leaderboard({ game, difficulties, initialDifficulty, asc
     async (level) => {
       if (!supabase) return;
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from("scores")
-        .select("nickname, score, created_at")
+        .select(showTime ? "nickname, score, time_seconds, created_at" : "nickname, score, created_at")
         .eq("game", game)
         .eq("difficulty", level)
-        .order("score", { ascending })
-        .limit(10);
+        .order("score", { ascending });
+      if (showTime) {
+        query = query.order("time_seconds", { ascending: true, nullsFirst: false });
+      }
+      const { data, error } = await query.limit(10);
       setLoading(false);
       if (!error && data) setScores(data);
     },
-    [game, ascending]
+    [game, ascending, showTime]
   );
 
   useEffect(() => {
@@ -145,6 +159,9 @@ export default function Leaderboard({ game, difficulties, initialDifficulty, asc
                     <span style={styles.leaderboardScore}>
                       {s.score}
                       {unit}
+                      {showTime && s.time_seconds != null && (
+                        <span style={styles.leaderboardTime}> · {formatTime(s.time_seconds)}</span>
+                      )}
                     </span>
                   </li>
                 ))}
@@ -248,4 +265,5 @@ const styles = {
   rank: { color: "#E8C15A", fontWeight: 700, fontSize: 13, width: 18 },
   leaderboardName: { color: "#EDEDE0", fontSize: 13.5, flex: 1, fontFamily: "'IBM Plex Sans', sans-serif" },
   leaderboardScore: { color: "#B9C4B4", fontSize: 13, fontWeight: 600 },
+  leaderboardTime: { color: "#8FA089", fontWeight: 500 },
 };
