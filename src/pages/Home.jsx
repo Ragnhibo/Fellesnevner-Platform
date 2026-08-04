@@ -55,6 +55,20 @@ const GAMES = [
     color: colors.blue,
     available: true,
   },
+  {
+    slug: "/flaggjakt",
+    title: "Flaggjakt",
+    tagline: "Gjett landet ut fra flagget.",
+    color: colors.pink,
+    available: true,
+  },
+  {
+    slug: "/sekvensjakt",
+    title: "Sekvensjakt",
+    tagline: "Finn neste tall i rekken.",
+    color: colors.accent,
+    available: true,
+  },
 ];
 
 function GameCard({ game }) {
