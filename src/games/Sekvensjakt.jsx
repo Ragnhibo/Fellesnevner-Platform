@@ -149,6 +149,11 @@ export default function Sekvensjakt() {
     }, 1100);
   };
 
+  const toggleSign = () => {
+    if (feedback) return;
+    setTextAnswer((prev) => (prev.startsWith("-") ? prev.slice(1) : "-" + prev));
+  };
+
   const shareResult = async () => {
     const correctCount = results.filter(Boolean).length;
     const grid = results.map((r) => (r ? "✅" : "❌")).join("");
@@ -208,9 +213,22 @@ export default function Sekvensjakt() {
           </div>
 
           <div style={styles.textRow}>
+            <button
+              type="button"
+              style={{ ...styles.signBtn, opacity: feedback ? 0.5 : 1 }}
+              className="rt-btn"
+              onClick={toggleSign}
+              disabled={!!feedback}
+              aria-label="Bytt fortegn (pluss eller minus)"
+            >
+              {textAnswer.startsWith("-") ? "−" : "+"}
+            </button>
             <input
               value={textAnswer}
-              onChange={(e) => setTextAnswer(e.target.value)}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (/^-?\d*$/.test(v)) setTextAnswer(v);
+              }}
               onKeyDown={(e) => e.key === "Enter" && submitText()}
               placeholder="Neste tall…"
               inputMode="numeric"
@@ -330,7 +348,19 @@ const styles = {
     justifyContent: "center",
   },
   qChip: { borderStyle: "dashed", borderColor: "#E8C15A", color: "#E8C15A" },
-  textRow: { display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" },
+  textRow: { display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", alignItems: "center" },
+  signBtn: {
+    border: "1.5px dashed rgba(237,237,224,0.4)",
+    borderRadius: 8,
+    color: "#EDEDE0",
+    background: "transparent",
+    fontSize: 18,
+    fontWeight: 700,
+    fontFamily: "'IBM Plex Mono', monospace",
+    width: 44,
+    height: 44,
+    cursor: "pointer",
+  },
   input: {
     background: "rgba(237,237,224,0.05)",
     border: "1.5px dashed rgba(237,237,224,0.4)",
