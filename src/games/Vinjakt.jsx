@@ -23,6 +23,16 @@ function shuffle(arr) {
   return a;
 }
 
+function uniqueBy(arr, keyFn) {
+  const seen = new Set();
+  return arr.filter((item) => {
+    const key = keyFn(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function getPools(poolKey) {
   const filter = poolKey === "common" ? (e) => e.common : () => true;
   return {
@@ -38,7 +48,10 @@ function buildItem(category, entry, pools, type) {
     const prompt = `${entry.name} er en vinregion i hvilket land?`;
     const answer = entry.country;
     if (type === "text") return { category, prompt, answer };
-    const wrongs = shuffle(pools.regions.filter((e) => e.country !== entry.country)).slice(0, 3);
+    const wrongs = uniqueBy(
+      shuffle(pools.regions.filter((e) => e.country !== entry.country)),
+      (e) => e.country
+    ).slice(0, 3);
     const options = shuffle([answer, ...wrongs.map((w) => w.country)]);
     return { category, prompt, answer, options };
   }
@@ -46,7 +59,10 @@ function buildItem(category, entry, pools, type) {
     const prompt = `${entry.name} er en druesort mest kjent fra hvilket land?`;
     const answer = entry.country;
     if (type === "text") return { category, prompt, answer };
-    const wrongs = shuffle(pools.grapes.filter((e) => e.country !== entry.country)).slice(0, 3);
+    const wrongs = uniqueBy(
+      shuffle(pools.grapes.filter((e) => e.country !== entry.country)),
+      (e) => e.country
+    ).slice(0, 3);
     const options = shuffle([answer, ...wrongs.map((w) => w.country)]);
     return { category, prompt, answer, options };
   }
