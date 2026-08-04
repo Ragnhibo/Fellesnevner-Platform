@@ -65,6 +65,90 @@ export function SaveScoreRow({ game, difficulty, score, timeSeconds }) {
   );
 }
 
+function useLeaderboardScores(game, difficulty, ascending, showTime, metric) {
+  const [scores, setScores] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const load = useCallback(async () => {
+    if (!supabase || !difficulty) return;
+    setLoading(true);
+    let query = supabase
+      .from("scores")
+      .select(metric === "time" ? "nickname, time_seconds, created_at" : showTime ? "nickname, score, time_seconds, created_at" : "nickname, score, created_at")
+      .eq("game", game)
+      .eq("difficulty", difficulty);
+    if (metric === "time") {
+      query = query.order("time_seconds", { ascending: true });
+    } else {
+      query = query.order("score", { ascending });
+      if (showTime) query = query.order("time_seconds", { ascending: true, nullsFirst: false });
+    }
+    const { data, error } = await query.limit(10);
+    setLoading(false);
+    if (!error && data) setScores(data);
+  }, [game, difficulty, ascending, showTime, metric]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { scores, loading };
+}
+
+function DifficultyTabs({ difficulties, diff, setDiff }) {
+  const entries = Object.entries(difficulties);
+  if (entries.length <= 1) return null;
+  return (
+    <div style={styles.difficultyRow}>
+      {entries.map(([key, c]) => (
+        <button
+          key={key}
+          onClick={() => setDiff(key)}
+          className="rt-btn"
+          style={{
+            ...styles.diffPill,
+            background: diff === key ? "rgba(232,193,90,0.18)" : "transparent",
+            color: diff === key ? colors.accent : colors.chalkMuted,
+            borderColor: diff === key ? colors.accent : "rgba(237,237,224,0.3)",
+          }}
+        >
+          {c.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ScoreList({ scores, loading, unit, showTime, metric }) {
+  if (loading) return <p style={{ color: "#B9C4B4", fontSize: 13 }}>Laster…</p>;
+  if (scores.length === 0) {
+    return <p style={{ color: "#B9C4B4", fontSize: 13 }}>Ingen resultater registrert enda for dette nivået.</p>;
+  }
+  return (
+    <ol style={styles.leaderboardList}>
+      {scores.map((s, i) => (
+        <li key={i} style={styles.leaderboardItem}>
+          <span style={styles.rank}>{i + 1}</span>
+          <span style={styles.leaderboardName}>{s.nickname}</span>
+          <span style={styles.leaderboardScore}>
+            {metric === "time" ? (
+              formatTime(s.time_seconds)
+            ) : (
+              <>
+                {s.score}
+                {unit}
+                {showTime && s.time_seconds != null && (
+                  <span style={styles.leaderboardTime}> · {formatTime(s.time_seconds)}</span>
+                )}
+              </>
+            )}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function formatTime(seconds) {
   const s = Math.round(seconds);
   const m = Math.floor(s / 60);
@@ -72,44 +156,33 @@ function formatTime(seconds) {
   return `${m}:${rem.toString().padStart(2, "0")}`;
 }
 
-// Trophy button that opens a modal with per-difficulty top-10. Pass
-// ascending=true when a lower score is better (guesses, time), false when
-// higher is better (correct answers, points). `unit` is appended after the
-// number, e.g. " forsøk" or " riktige".
-export default function Leaderboard({ game, difficulties, initialDifficulty, ascending, unit = "", showTime = false }) {
-  const [open, setOpen] = useState(false);
+// Bare list (tabs + top-10), no trophy button or modal chrome — for
+// embedding directly on a page, e.g. an all-games "Topplister" overview.
+export function LeaderboardList({ game, difficulties, initialDifficulty, ascending, unit = "", showTime = false, metric = "score" }) {
   const [diff, setDiff] = useState(initialDifficulty);
-  const [scores, setScores] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const load = useCallback(
-    async (level) => {
-      if (!supabase) return;
-      setLoading(true);
-      let query = supabase
-        .from("scores")
-        .select(showTime ? "nickname, score, time_seconds, created_at" : "nickname, score, created_at")
-        .eq("game", game)
-        .eq("difficulty", level)
-        .order("score", { ascending });
-      if (showTime) {
-        query = query.order("time_seconds", { ascending: true, nullsFirst: false });
-      }
-      const { data, error } = await query.limit(10);
-      setLoading(false);
-      if (!error && data) setScores(data);
-    },
-    [game, ascending, showTime]
-  );
-
-  useEffect(() => {
-    if (open) load(diff);
-  }, [open, diff, load]);
+  const { scores, loading } = useLeaderboardScores(game, diff, ascending, showTime, metric);
 
   if (!supabase) return null;
 
-  const diffEntries = Object.entries(difficulties);
-  const showTabs = diffEntries.length > 1;
+  return (
+    <div>
+      <DifficultyTabs difficulties={difficulties} diff={diff} setDiff={setDiff} />
+      <ScoreList scores={scores} loading={loading} unit={unit} showTime={showTime} metric={metric} />
+    </div>
+  );
+}
+
+// Trophy button that opens a modal with per-difficulty top-10. Pass
+// ascending=true when a lower score is better (guesses, time), false when
+// higher is better (correct answers, points). `unit` is appended after the
+// number, e.g. " forsøk" or " riktige". Pass metric="time" for games (like
+// Ordspill) whose primary ranking is completion time rather than a score.
+export default function Leaderboard({ game, difficulties, initialDifficulty, ascending, unit = "", showTime = false, metric = "score" }) {
+  const [open, setOpen] = useState(false);
+  const [diff, setDiff] = useState(initialDifficulty);
+  const { scores, loading } = useLeaderboardScores(game, open ? diff : null, ascending, showTime, metric);
+
+  if (!supabase) return null;
 
   return (
     <>
@@ -125,48 +198,8 @@ export default function Leaderboard({ game, difficulties, initialDifficulty, asc
                 <X size={18} />
               </button>
             </div>
-
-            {showTabs && (
-              <div style={styles.difficultyRow}>
-                {diffEntries.map(([key, c]) => (
-                  <button
-                    key={key}
-                    onClick={() => setDiff(key)}
-                    className="rt-btn"
-                    style={{
-                      ...styles.diffPill,
-                      background: diff === key ? "rgba(232,193,90,0.18)" : "transparent",
-                      color: diff === key ? colors.accent : colors.chalkMuted,
-                      borderColor: diff === key ? colors.accent : "rgba(237,237,224,0.3)",
-                    }}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {loading && <p style={{ color: "#B9C4B4", fontSize: 13 }}>Laster…</p>}
-            {!loading && scores.length === 0 && (
-              <p style={{ color: "#B9C4B4", fontSize: 13 }}>Ingen resultater registrert enda for dette nivået.</p>
-            )}
-            {!loading && scores.length > 0 && (
-              <ol style={styles.leaderboardList}>
-                {scores.map((s, i) => (
-                  <li key={i} style={styles.leaderboardItem}>
-                    <span style={styles.rank}>{i + 1}</span>
-                    <span style={styles.leaderboardName}>{s.nickname}</span>
-                    <span style={styles.leaderboardScore}>
-                      {s.score}
-                      {unit}
-                      {showTime && s.time_seconds != null && (
-                        <span style={styles.leaderboardTime}> · {formatTime(s.time_seconds)}</span>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            )}
+            <DifficultyTabs difficulties={difficulties} diff={diff} setDiff={setDiff} />
+            <ScoreList scores={scores} loading={loading} unit={unit} showTime={showTime} metric={metric} />
           </div>
         </div>
       )}
