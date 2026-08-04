@@ -104,6 +104,16 @@ const BOARDS = [
     unit: " riktige",
     showTime: true,
   },
+  {
+    slug: "/vinjakt",
+    title: "Vinjakt",
+    game: "vinjakt",
+    difficulties: STANDARD_DIFF,
+    initialDifficulty: "middels",
+    ascending: false,
+    unit: " riktige",
+    showTime: true,
+  },
 ];
 
 export default function Topplister() {

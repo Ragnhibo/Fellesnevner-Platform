@@ -70,6 +70,13 @@ const GAMES = [
     available: true,
   },
   {
+    slug: "/vinjakt",
+    title: "Vinjakt",
+    tagline: "Vinregioner, druer og vinord.",
+    color: colors.pink,
+    available: true,
+  },
+  {
     slug: "/ordspill",
     title: "Ordspill",
     tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
