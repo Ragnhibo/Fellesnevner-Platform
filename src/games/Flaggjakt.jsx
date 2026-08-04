@@ -1,0 +1,440 @@
+import React, { useState, useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { RotateCcw, Share2 } from "lucide-react";
+import { shared, colors, usePageTitle, copyToClipboard, normalizeText } from "../theme";
+import { COUNTRIES } from "../data/countries";
+import { COUNTRY_ISO, flagEmoji } from "../data/countryFlags";
+import PageShell from "../components/PageShell";
+import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
+
+const ROUND_LENGTH = 10;
+
+// Only countries with a flag we can actually render reliably as an emoji.
+const FLAGGABLE = COUNTRIES.filter((c) => COUNTRY_ISO[c.country]);
+
+const DIFFICULTY = {
+  lett: { label: "Lett", type: "mc", pool: "common" },
+  middels: { label: "Middels", type: "mc", pool: "all" },
+  vanskelig: { label: "Vanskelig", type: "text", pool: "all" },
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function buildRound(pool, type, allowReverse) {
+  const shuffled = shuffle(pool).slice(0, ROUND_LENGTH);
+  return shuffled.map((entry) => {
+    const flag = flagEmoji(COUNTRY_ISO[entry.country]);
+
+    if (type === "text") {
+      return {
+        kind: "text",
+        entry,
+        prompt: flag,
+        answer: entry.country,
+      };
+    }
+
+    // Middels: mix "vis flagg, velg land" and "vis land, velg flagg" for
+    // variety. Lett always shows the flag (allowReverse = false).
+    const showFlagOptions = allowReverse && Math.random() < 0.35;
+
+    if (showFlagOptions) {
+      const wrongs = shuffle(pool.filter((e) => e.country !== entry.country)).slice(0, 3);
+      const options = shuffle([entry.country, ...wrongs.map((w) => w.country)]);
+      return {
+        kind: "name-to-flag",
+        entry,
+        prompt: `Hvilket flagg tilhører ${entry.country}?`,
+        answer: flag,
+        options: options.map((name) => ({
+          label: flagEmoji(COUNTRY_ISO[name]),
+          country: name,
+        })),
+      };
+    }
+
+    const wrongs = shuffle(pool.filter((e) => e.country !== entry.country)).slice(0, 3);
+    const options = shuffle([entry.country, ...wrongs.map((w) => w.country)]);
+    return {
+      kind: "flag-to-name",
+      entry,
+      prompt: flag,
+      answer: entry.country,
+      options,
+    };
+  });
+}
+
+export default function Flaggjakt() {
+  usePageTitle("Flaggjakt");
+  const [difficulty, setDifficulty] = useState("middels");
+  const pool = useMemo(
+    () => (DIFFICULTY[difficulty].pool === "common" ? FLAGGABLE.filter((c) => c.common) : FLAGGABLE),
+    [difficulty]
+  );
+  const [round, setRound] = useState(() => buildRound(pool, DIFFICULTY[difficulty].type, difficulty !== "lett"));
+  const [qIndex, setQIndex] = useState(0);
+  const [results, setResults] = useState([]);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [textAnswer, setTextAnswer] = useState("");
+  const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
+  const [status, setStatus] = useState("playing"); // playing | done
+  const [gamesPlayed, setGamesPlayed] = useState(1);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const current = round[qIndex];
+
+  const resetRound = (level) => {
+    const nextPool = DIFFICULTY[level].pool === "common" ? FLAGGABLE.filter((c) => c.common) : FLAGGABLE;
+    setRound(buildRound(nextPool, DIFFICULTY[level].type, level !== "lett"));
+    setQIndex(0);
+    setResults([]);
+    setUserAnswers([]);
+    setSelectedOption(null);
+    setTextAnswer("");
+    setFeedback(null);
+    setStatus("playing");
+    setGamesPlayed((n) => n + 1);
+    setShareCopied(false);
+  };
+
+  const changeDifficulty = (level) => {
+    if (level === difficulty) return;
+    setDifficulty(level);
+    resetRound(level);
+  };
+
+  const startNewGame = useCallback(() => {
+    resetRound(difficulty);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [difficulty]);
+
+  const advance = (wasCorrect, givenAnswer) => {
+    setResults((prev) => [...prev, wasCorrect]);
+    setUserAnswers((prev) => [...prev, givenAnswer]);
+    setTimeout(() => {
+      setFeedback(null);
+      setSelectedOption(null);
+      setTextAnswer("");
+      if (qIndex + 1 >= round.length) {
+        setStatus("done");
+      } else {
+        setQIndex((i) => i + 1);
+      }
+    }, 1100);
+  };
+
+  const pickOption = (opt, label) => {
+    if (feedback) return;
+    const correct = opt === current.answer;
+    setSelectedOption(opt);
+    setFeedback(correct ? "correct" : "wrong");
+    advance(correct, label !== undefined ? label : opt);
+  };
+
+  const submitText = () => {
+    if (feedback || !textAnswer.trim()) return;
+    const correct = normalizeText(textAnswer) === normalizeText(current.answer);
+    setFeedback(correct ? "correct" : "wrong");
+    advance(correct, textAnswer.trim());
+  };
+
+  const shareResult = async () => {
+    const correctCount = results.filter(Boolean).length;
+    const grid = results.map((r) => (r ? "✅" : "❌")).join("");
+    const text = `Flaggjakt (${DIFFICULTY[difficulty].label}) — ${correctCount}/${ROUND_LENGTH}\n${grid}\nfellesnevner.no/flaggjakt`;
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
+
+  const correctCount = results.filter(Boolean).length;
+
+  return (
+    <PageShell>
+      <div style={shared.header}>
+        <Link to="/" style={styles.backLink}>
+          ← Fellesnevner
+        </Link>
+        <h1 style={shared.title}>Flaggjakt</h1>
+        <p style={shared.subtitle}>Gjett landet ut fra flagget — {ROUND_LENGTH} spørsmål per runde.</p>
+      </div>
+
+      <div style={styles.difficultyRow}>
+        {Object.entries(DIFFICULTY).map(([key, c]) => (
+          <button
+            key={key}
+            onClick={() => changeDifficulty(key)}
+            className="rt-btn"
+            style={{
+              ...styles.diffPill,
+              background: difficulty === key ? "rgba(232,193,90,0.18)" : "transparent",
+              color: difficulty === key ? colors.accent : colors.chalkMuted,
+              borderColor: difficulty === key ? colors.accent : "rgba(237,237,224,0.3)",
+            }}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ textAlign: "center", marginBottom: 14 }}>
+        <span style={styles.metaText}>
+          Runde {gamesPlayed} · spørsmål {Math.min(qIndex + 1, ROUND_LENGTH)}/{ROUND_LENGTH} · {correctCount} riktig
+        </span>
+      </div>
+
+      {status === "playing" && current && (
+        <div style={styles.card}>
+          {current.kind === "name-to-flag" ? (
+            <p style={styles.question}>{current.prompt}</p>
+          ) : (
+            <p style={styles.flagDisplay}>{current.prompt}</p>
+          )}
+
+          {current.kind === "flag-to-name" && (
+            <div style={styles.optionsGrid}>
+              {current.options.map((opt) => {
+                let bg = "rgba(237,237,224,0.03)";
+                let border = "rgba(237,237,224,0.3)";
+                if (feedback && opt === current.answer) {
+                  bg = "rgba(143,201,138,0.2)";
+                  border = colors.mint;
+                } else if (feedback && opt === selectedOption) {
+                  bg = "rgba(217,143,160,0.2)";
+                  border = colors.pink;
+                }
+                return (
+                  <button
+                    key={opt}
+                    onClick={() => pickOption(opt)}
+                    className="rt-btn"
+                    style={{ ...styles.optionBtn, background: bg, borderColor: border }}
+                  >
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {current.kind === "name-to-flag" && (
+            <div style={styles.optionsGrid}>
+              {current.options.map((opt) => {
+                let bg = "rgba(237,237,224,0.03)";
+                let border = "rgba(237,237,224,0.3)";
+                if (feedback && opt.label === current.answer) {
+                  bg = "rgba(143,201,138,0.2)";
+                  border = colors.mint;
+                } else if (feedback && opt.label === selectedOption) {
+                  bg = "rgba(217,143,160,0.2)";
+                  border = colors.pink;
+                }
+                return (
+                  <button
+                    key={opt.country}
+                    onClick={() => pickOption(opt.label, opt.country)}
+                    className="rt-btn"
+                    style={{ ...styles.optionBtn, ...styles.flagOptionBtn, background: bg, borderColor: border }}
+                  >
+                    {opt.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {current.kind === "text" && (
+            <div style={styles.textRow}>
+              <input
+                value={textAnswer}
+                onChange={(e) => setTextAnswer(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && submitText()}
+                placeholder="Skriv landet…"
+                style={styles.input}
+                disabled={!!feedback}
+                autoFocus
+              />
+              <button
+                style={{ ...styles.btn, ...styles.btnPrimary, opacity: textAnswer.trim() ? 1 : 0.5 }}
+                className="rt-btn"
+                onClick={submitText}
+                disabled={!!feedback}
+              >
+                Svar
+              </button>
+            </div>
+          )}
+
+          {feedback && (
+            <p style={{ ...styles.feedbackText, color: feedback === "correct" ? colors.mint : colors.pink }}>
+              {feedback === "correct"
+                ? "Riktig!"
+                : current.kind === "name-to-flag"
+                ? `Feil — riktig var ${current.entry.country}.`
+                : `Feil — riktig svar var ${current.answer}.`}
+            </p>
+          )}
+        </div>
+      )}
+
+      {status === "done" && (
+        <div style={styles.endBanner}>
+          <p style={styles.endText}>
+            Du fikk {correctCount} av {ROUND_LENGTH} riktig!
+          </p>
+
+          <SaveScoreRow game="flaggjakt" difficulty={difficulty} score={correctCount} />
+
+          <div style={styles.reviewList}>
+            {round.map((q, i) => {
+              const correct = results[i];
+              return (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.reviewRow,
+                    borderColor: correct ? "rgba(143,201,138,0.4)" : "rgba(217,143,160,0.4)",
+                  }}
+                >
+                  <span style={styles.reviewPrompt}>
+                    {flagEmoji(COUNTRY_ISO[q.entry.country])} {q.entry.country}
+                  </span>
+                  <span style={{ ...styles.reviewAnswer, color: correct ? colors.mint : colors.pink }}>
+                    {correct ? "✓ Riktig" : `✗ Feil${userAnswers[i] ? ` (du svarte: ${userAnswers[i]})` : ""}`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
+            <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
+              <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt sett
+            </button>
+            <Leaderboard
+              game="flaggjakt"
+              difficulties={DIFFICULTY}
+              initialDifficulty={difficulty}
+              ascending={false}
+              unit=" riktige"
+            />
+            <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
+              <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
+            </button>
+          </div>
+        </div>
+      )}
+    </PageShell>
+  );
+}
+
+const styles = {
+  backLink: {
+    display: "inline-block",
+    color: "#8FA089",
+    fontSize: 12.5,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    textDecoration: "none",
+    marginBottom: 10,
+  },
+  metaText: { color: "#8FA089", fontSize: 12, fontFamily: "'IBM Plex Mono', monospace" },
+  difficultyRow: { display: "flex", justifyContent: "center", gap: 6, marginBottom: 10, flexWrap: "wrap" },
+  diffPill: {
+    border: "1.5px solid",
+    borderRadius: 8,
+    padding: "8px 16px",
+    fontSize: 12,
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    cursor: "pointer",
+    minHeight: 36,
+  },
+  card: {
+    border: "2px dashed rgba(237,237,224,0.3)",
+    borderRadius: 10,
+    padding: "20px 16px",
+    textAlign: "center",
+  },
+  question: {
+    color: "#EDEDE0",
+    fontSize: "clamp(16px, 4vw, 19px)",
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    marginBottom: 16,
+  },
+  flagDisplay: { fontSize: "clamp(64px, 18vw, 96px)", lineHeight: 1, marginBottom: 18 },
+  optionsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 },
+  optionBtn: {
+    border: "1.5px solid",
+    borderRadius: 8,
+    padding: "14px 10px",
+    fontSize: 14,
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    color: "#EDEDE0",
+    cursor: "pointer",
+    minHeight: 48,
+  },
+  flagOptionBtn: { fontSize: 34, padding: "10px" },
+  textRow: { display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" },
+  input: {
+    background: "rgba(237,237,224,0.05)",
+    border: "1.5px dashed rgba(237,237,224,0.4)",
+    borderRadius: 8,
+    padding: "12px 16px",
+    color: "#EDEDE0",
+    fontSize: 16,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    outline: "none",
+    minWidth: 200,
+  },
+  feedbackText: { marginTop: 14, fontSize: 14, fontWeight: 600, fontFamily: "'IBM Plex Sans', sans-serif" },
+  btn: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "none",
+    borderRadius: 8,
+    padding: "12px 20px",
+    fontSize: 13.5,
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    minHeight: 44,
+    cursor: "pointer",
+  },
+  btnGhost: { background: "transparent", border: "1.5px dashed rgba(237,237,224,0.4)", color: "#EDEDE0" },
+  btnPrimary: { background: "#E8C15A", color: "#16221A" },
+  endBanner: { textAlign: "center", marginTop: 10 },
+  endText: { color: "#EDEDE0", fontSize: 15, marginBottom: 12, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 },
+  reviewList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    marginBottom: 16,
+    maxHeight: "44vh",
+    overflowY: "auto",
+    textAlign: "left",
+  },
+  reviewRow: {
+    border: "1.5px solid",
+    borderRadius: 8,
+    padding: "8px 12px",
+    background: "rgba(237,237,224,0.03)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+  },
+  reviewPrompt: { color: "#B9C4B4", fontSize: 12.5, fontFamily: "'IBM Plex Sans', sans-serif" },
+  reviewAnswer: { fontSize: 13, fontWeight: 600, fontFamily: "'IBM Plex Sans', sans-serif" },
+};
