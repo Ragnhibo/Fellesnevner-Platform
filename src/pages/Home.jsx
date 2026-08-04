@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
-import { shared, colors, usePageTitle } from "../theme";
+import { ArrowRight, Trophy, Share2 } from "lucide-react";
+import { shared, colors, usePageTitle, copyToClipboard } from "../theme";
 import Logo from "../components/Logo";
 import PageShell from "../components/PageShell";
 
@@ -104,12 +104,31 @@ function GameCard({ game }) {
 
 export default function Home() {
   usePageTitle(null);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const shareSite = async () => {
+    const text = "Prøv Fellesnevner — gratis norske nettleserspill! fellesnevner.no";
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setShareCopied(true);
+      setTimeout(() => setShareCopied(false), 2000);
+    }
+  };
+
   return (
     <PageShell>
       <div style={shared.header}>
         <Logo />
         <h1 style={shared.title}>Fellesnevner</h1>
         <p style={shared.subtitle}>Flere spill, én fellesnevner. Velg et spill under.</p>
+        <div style={styles.headerLinks}>
+          <Link to="/topplister" style={styles.headerLink}>
+            <Trophy size={14} style={{ marginRight: 5 }} /> Topplister
+          </Link>
+          <button style={styles.headerLinkBtn} className="rt-btn" onClick={shareSite}>
+            <Share2 size={14} style={{ marginRight: 5 }} /> {shareCopied ? "Kopiert!" : "Del med venner"}
+          </button>
+        </div>
       </div>
 
       <div style={styles.grid}>
@@ -122,6 +141,38 @@ export default function Home() {
 }
 
 const styles = {
+  headerLinks: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 14,
+    flexWrap: "wrap",
+  },
+  headerLink: {
+    display: "inline-flex",
+    alignItems: "center",
+    border: "1.5px dashed rgba(237,237,224,0.4)",
+    borderRadius: 8,
+    padding: "9px 16px",
+    fontSize: 12.5,
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    color: "#EDEDE0",
+    textDecoration: "none",
+  },
+  headerLinkBtn: {
+    display: "inline-flex",
+    alignItems: "center",
+    border: "1.5px dashed rgba(237,237,224,0.4)",
+    borderRadius: 8,
+    padding: "9px 16px",
+    fontSize: 12.5,
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Sans', sans-serif",
+    color: "#EDEDE0",
+    background: "transparent",
+    cursor: "pointer",
+  },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
