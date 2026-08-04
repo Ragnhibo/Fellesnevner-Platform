@@ -48,7 +48,7 @@ function buildRound(cfg) {
   });
 }
 
-function StateMap({ highlight, onCellClick, interactive }) {
+function StateMap({ highlight, onCellClick, interactive, showLabels }) {
   const cells = [];
   for (let r = 0; r < GRID_ROWS; r++) {
     for (let c = 0; c < GRID_COLS; c++) {
@@ -81,9 +81,9 @@ function StateMap({ highlight, onCellClick, interactive }) {
               borderColor: border,
               cursor: interactive ? "pointer" : "default",
             }}
-            title={s.state}
+            title={showLabels ? s.state : undefined}
           >
-            {s.abbr}
+            {showLabels ? s.abbr : ""}
           </button>
         );
       })}
@@ -98,6 +98,7 @@ export default function Delstatsjakt() {
   const [round, setRound] = useState(() => buildRound(cfg));
   const [qIndex, setQIndex] = useState(0);
   const [results, setResults] = useState([]);
+  const [userAnswers, setUserAnswers] = useState([]);
   const [highlight, setHighlight] = useState(null);
   const [textAnswer, setTextAnswer] = useState("");
   const [feedback, setFeedback] = useState(null);
@@ -113,6 +114,7 @@ export default function Delstatsjakt() {
     setRound(buildRound(DIFFICULTY[level]));
     setQIndex(0);
     setResults([]);
+    setUserAnswers([]);
     setHighlight(null);
     setTextAnswer("");
     setFeedback(null);
@@ -134,9 +136,10 @@ export default function Delstatsjakt() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [difficulty]);
 
-  const advance = (wasCorrect) => {
+  const advance = (wasCorrect, givenAnswer) => {
     const nextResults = [...results, wasCorrect];
     setResults(nextResults);
+    setUserAnswers((prev) => [...prev, givenAnswer]);
     setTimeout(() => {
       setFeedback(null);
       setHighlight(null);
@@ -158,21 +161,23 @@ export default function Delstatsjakt() {
       [clickedState.state]: isTarget ? "correct" : "wrong",
       [current.entry.state]: "correct",
     });
-    advance(isTarget);
+    advance(isTarget, clickedState.state);
   };
 
   const pickOption = (opt) => {
     if (feedback) return;
     const correct = opt === current.entry.capital;
     setFeedback(correct ? "correct" : "wrong");
-    advance(correct);
+    setHighlight({ [current.entry.state]: "correct" });
+    advance(correct, opt);
   };
 
   const submitText = () => {
     if (feedback || !textAnswer.trim()) return;
     const correct = normalizeText(textAnswer) === normalizeText(current.entry.capital);
     setFeedback(correct ? "correct" : "wrong");
-    advance(correct);
+    setHighlight({ [current.entry.state]: "correct" });
+    advance(correct, textAnswer.trim());
   };
 
   const shareResult = async () => {
@@ -227,7 +232,12 @@ export default function Delstatsjakt() {
         <div style={styles.card}>
           <p style={styles.question}>{current.prompt}</p>
 
-          <StateMap highlight={highlight} onCellClick={handleMapClick} interactive={isMapQuestion && !feedback} />
+          <StateMap
+            highlight={highlight}
+            onCellClick={handleMapClick}
+            interactive={isMapQuestion && !feedback}
+            showLabels={difficulty === "lett"}
+          />
 
           {current.type === "mc-capital" && (
             <div style={styles.optionsGrid}>
@@ -292,6 +302,29 @@ export default function Delstatsjakt() {
             Du fikk {correctCount} av {ROUND_LENGTH} riktig!
           </p>
           <SaveScoreRow game="delstatsjakt" difficulty={difficulty} score={correctCount} timeSeconds={finalTime} />
+
+          <div style={styles.reviewList}>
+            {round.map((q, i) => {
+              const correct = results[i];
+              return (
+                <div
+                  key={i}
+                  style={{
+                    ...styles.reviewRow,
+                    borderColor: correct ? "rgba(143,201,138,0.4)" : "rgba(217,143,160,0.4)",
+                  }}
+                >
+                  <span style={styles.reviewPrompt}>{q.prompt}</span>
+                  <span style={{ ...styles.reviewAnswer, color: correct ? colors.mint : colors.pink }}>
+                    {correct
+                      ? `✓ ${q.entry.state} (${q.entry.capital})`
+                      : `✗ Riktig: ${q.entry.state} (${q.entry.capital})${userAnswers[i] ? ` (du svarte: ${userAnswers[i]})` : ""}`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
           <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
             <button style={{ ...styles.btn, ...styles.btnPrimary }} className="rt-btn" onClick={startNewGame}>
               <RotateCcw size={16} style={{ marginRight: 6 }} /> Nytt sett
@@ -411,4 +444,24 @@ const styles = {
   btnPrimary: { background: "#E8C15A", color: "#16221A" },
   endBanner: { textAlign: "center", marginTop: 10 },
   endText: { color: "#EDEDE0", fontSize: 15, marginBottom: 12, fontFamily: "'IBM Plex Sans', sans-serif", fontWeight: 600 },
+  reviewList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    marginBottom: 16,
+    maxHeight: "44vh",
+    overflowY: "auto",
+    textAlign: "left",
+  },
+  reviewRow: {
+    border: "1.5px solid",
+    borderRadius: 8,
+    padding: "8px 12px",
+    background: "rgba(237,237,224,0.03)",
+    display: "flex",
+    flexDirection: "column",
+    gap: 3,
+  },
+  reviewPrompt: { color: "#B9C4B4", fontSize: 12.5, fontFamily: "'IBM Plex Sans', sans-serif" },
+  reviewAnswer: { fontSize: 13, fontWeight: 600, fontFamily: "'IBM Plex Sans', sans-serif" },
 };
