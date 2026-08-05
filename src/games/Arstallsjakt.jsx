@@ -159,7 +159,13 @@ export default function Arstallsjakt() {
   };
 
   const tapSortItem = (idx) => {
-    if (feedback || sortPicks.includes(idx)) return;
+    if (feedback) return;
+    if (sortPicks.includes(idx)) {
+      // Tapping an already-picked item un-picks it, so a mis-tap can be
+      // corrected without having to restart the whole question.
+      setSortPicks((prev) => prev.filter((i) => i !== idx));
+      return;
+    }
     const next = [...sortPicks, idx];
     setSortPicks(next);
     if (next.length === current.items.length) {
@@ -282,7 +288,7 @@ export default function Arstallsjakt() {
       {status === "playing" && current && current.kind === "sort" && (
         <div style={styles.card}>
           <span style={styles.categoryTag}>Sorter kronologisk</span>
-          <p style={styles.question}>Trykk på hendelsene i rekkefølge, eldst først.</p>
+          <p style={styles.question}>Trykk på hendelsene i rekkefølge, eldst først. Trykk en valgt hendelse igjen for å angre.</p>
 
           <div style={styles.sortList}>
             {current.items.map((item, idx) => {
@@ -304,7 +310,7 @@ export default function Arstallsjakt() {
                   key={idx}
                   onClick={() => tapSortItem(idx)}
                   className="rt-btn"
-                  disabled={!!feedback || isPicked}
+                  disabled={!!feedback}
                   style={{ ...styles.sortItem, borderColor: border, background: bg }}
                 >
                   <span style={styles.sortBadge}>{isPicked ? pickPosition + 1 : ""}</span>
