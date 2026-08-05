@@ -684,20 +684,16 @@ export default function Ordjakt() {
     }
   };
 
-  const [inputLocked, setInputLocked] = useState(false);
-
   const handleLetter = useCallback((letter) => {
-    if (inputLocked) return;
     setCurrentGuess((prev) => (prev.length < WORD_LEN ? prev + letter : prev));
-  }, [inputLocked]);
+  }, []);
 
   const handleBackspace = useCallback(() => {
-    if (inputLocked) return;
     setCurrentGuess((prev) => prev.slice(0, -1));
-  }, [inputLocked]);
+  }, []);
 
   const handleEnter = useCallback(() => {
-    if (status !== "playing" || inputLocked) return;
+    if (status !== "playing") return;
     if (currentGuess.length < WORD_LEN) {
       setShake(true);
       setTimeout(() => setShake(false), 450);
@@ -713,18 +709,13 @@ export default function Ordjakt() {
     const nextGuesses = [...guesses, currentGuess];
     setGuesses(nextGuesses);
     setCurrentGuess("");
-    // Briefly ignore input right after submitting — absorbs a stray tap
-    // that lands on the on-screen keyboard in the same touch gesture as
-    // the Enter/Svar press, which would otherwise leak into the next row.
-    setInputLocked(true);
-    setTimeout(() => setInputLocked(false), 250);
     if (currentGuess === target) {
       setStatus("won");
     } else if (nextGuesses.length >= MAX_GUESSES) {
       setStatus("lost");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, currentGuess, guesses, target, inputLocked]);
+  }, [status, currentGuess, guesses, target]);
 
   useEffect(() => {
     function onKeyDown(e) {
@@ -906,13 +897,13 @@ const styles = {
   },
   btnPrimary: { background: "#E8C15A", color: "#16221A" },
   btnGhost: { background: "transparent", border: "1.5px dashed rgba(237,237,224,0.4)", color: "#EDEDE0" },
-  keyboard: { display: "flex", flexDirection: "column", gap: 6, marginTop: 14, alignItems: "center" },
-  keyRow: { display: "flex", gap: 5, justifyContent: "center" },
+  keyboard: { display: "flex", flexDirection: "column", gap: 8, marginTop: 14, alignItems: "center" },
+  keyRow: { display: "flex", gap: 7, justifyContent: "center" },
   key: {
     border: "1.5px solid",
     borderRadius: 6,
     minWidth: 30,
-    height: 44,
+    height: 46,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
