@@ -54,6 +54,7 @@ const BOARDS = [
     initialDifficulty: "middels",
     ascending: false,
     unit: " funnet",
+    showTime: true,
   },
   {
     slug: "/delstatsjakt",
