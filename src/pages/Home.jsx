@@ -7,18 +7,18 @@ import PageShell from "../components/PageShell";
 
 const GAMES = [
   {
-    slug: "/ordspill",
-    title: "Ordspill",
-    tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
-    color: colors.accent,
-    category: "Ord",
-    available: true,
-  },
-  {
     slug: "/ordjakt",
     title: "Ordjakt",
     tagline: "Gjett det norske ordet på fem bokstaver — seks forsøk.",
     color: colors.mint,
+    category: "Ord",
+    available: true,
+  },
+  {
+    slug: "/ordspill",
+    title: "Ordspill",
+    tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
+    color: colors.accent,
     category: "Ord",
     available: true,
   },
