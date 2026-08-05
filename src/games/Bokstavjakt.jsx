@@ -50,6 +50,8 @@ export default function Bokstavjakt() {
   const [status, setStatus] = useState("playing"); // playing | won | timeup
   const [gamesPlayed, setGamesPlayed] = useState(1);
   const [shareCopied, setShareCopied] = useState(false);
+  const [finalTime, setFinalTime] = useState(null);
+  const startTimeRef = useRef(Date.now());
   const inputRef = useRef(null);
 
   const resetRound = (level) => {
@@ -62,6 +64,8 @@ export default function Bokstavjakt() {
     setStatus("playing");
     setGamesPlayed((n) => n + 1);
     setShareCopied(false);
+    setFinalTime(null);
+    startTimeRef.current = Date.now();
   };
 
   const changeDifficulty = (level) => {
@@ -117,6 +121,7 @@ export default function Bokstavjakt() {
     setInput("");
     setMessage("");
     if (nextFound.length >= cfg.required) {
+      setFinalTime((Date.now() - startTimeRef.current) / 1000);
       setStatus("won");
     }
   };
@@ -229,7 +234,7 @@ export default function Bokstavjakt() {
                 : `Tiden løp ut — du fant ${found.length} av ${cfg.required}.`}
             </p>
 
-            <SaveScoreRow game="bokstavjakt" difficulty={difficulty} score={found.length} />
+            <SaveScoreRow game="bokstavjakt" difficulty={difficulty} score={found.length} timeSeconds={finalTime} />
 
             <p style={styles.revealLabel}>Alle gyldige svar på «{round.letter}»:</p>
             <div style={styles.chipRow}>
@@ -260,6 +265,7 @@ export default function Bokstavjakt() {
                 initialDifficulty={difficulty}
                 ascending={false}
                 unit=" funnet"
+                showTime
               />
               <button style={{ ...styles.btn, ...styles.btnGhost }} className="rt-btn" onClick={shareResult}>
                 <Share2 size={16} style={{ marginRight: 6 }} /> {shareCopied ? "Kopiert!" : "Del resultat"}
