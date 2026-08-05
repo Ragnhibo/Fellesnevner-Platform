@@ -1,44 +1,65 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from "@vercel/analytics/react";
 import { GLOBAL_CSS } from "./theme";
 import Home from "./pages/Home";
-import Topplister from "./pages/Topplister";
-import Ordspill from "./games/Ordspill";
-import Ordjakt from "./games/Ordjakt";
-import Kodejakt from "./games/Kodejakt";
-import Hovedstadsjakt from "./games/Hovedstadsjakt";
-import Bokstavjakt from "./games/Bokstavjakt";
-import Delstatsjakt from "./games/Delstatsjakt";
-import Regnejakt from "./games/Regnejakt";
-import Flaggjakt from "./games/Flaggjakt";
-import Sekvensjakt from "./games/Sekvensjakt";
-import Kryptojakt from "./games/Kryptojakt";
-import Vinjakt from "./games/Vinjakt";
-import Norgesjakt from "./games/Norgesjakt";
-import Arstallsjakt from "./games/Arstallsjakt";
+
+const Topplister = lazy(() => import("./pages/Topplister"));
+const Ordspill = lazy(() => import("./games/Ordspill"));
+const Ordjakt = lazy(() => import("./games/Ordjakt"));
+const Kodejakt = lazy(() => import("./games/Kodejakt"));
+const Hovedstadsjakt = lazy(() => import("./games/Hovedstadsjakt"));
+const Bokstavjakt = lazy(() => import("./games/Bokstavjakt"));
+const Delstatsjakt = lazy(() => import("./games/Delstatsjakt"));
+const Regnejakt = lazy(() => import("./games/Regnejakt"));
+const Flaggjakt = lazy(() => import("./games/Flaggjakt"));
+const Sekvensjakt = lazy(() => import("./games/Sekvensjakt"));
+const Kryptojakt = lazy(() => import("./games/Kryptojakt"));
+const Vinjakt = lazy(() => import("./games/Vinjakt"));
+const Norgesjakt = lazy(() => import("./games/Norgesjakt"));
+const Arstallsjakt = lazy(() => import("./games/Arstallsjakt"));
+
+function LoadingFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "60vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#8FA089",
+        fontFamily: "'IBM Plex Sans', sans-serif",
+        fontSize: 13,
+      }}
+    >
+      Laster…
+    </div>
+  );
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <style>{GLOBAL_CSS}</style>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/topplister" element={<Topplister />} />
-        <Route path="/ordspill" element={<Ordspill />} />
-        <Route path="/ordjakt" element={<Ordjakt />} />
-        <Route path="/kodejakt" element={<Kodejakt />} />
-        <Route path="/hovedstadsjakt" element={<Hovedstadsjakt />} />
-        <Route path="/bokstavjakt" element={<Bokstavjakt />} />
-        <Route path="/delstatsjakt" element={<Delstatsjakt />} />
-        <Route path="/regnejakt" element={<Regnejakt />} />
-        <Route path="/flaggjakt" element={<Flaggjakt />} />
-        <Route path="/sekvensjakt" element={<Sekvensjakt />} />
-        <Route path="/kryptojakt" element={<Kryptojakt />} />
-        <Route path="/vinjakt" element={<Vinjakt />} />
-        <Route path="/norgesjakt" element={<Norgesjakt />} />
-        <Route path="/arstallsjakt" element={<Arstallsjakt />} />
-      </Routes>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/topplister" element={<Topplister />} />
+          <Route path="/ordspill" element={<Ordspill />} />
+          <Route path="/ordjakt" element={<Ordjakt />} />
+          <Route path="/kodejakt" element={<Kodejakt />} />
+          <Route path="/hovedstadsjakt" element={<Hovedstadsjakt />} />
+          <Route path="/bokstavjakt" element={<Bokstavjakt />} />
+          <Route path="/delstatsjakt" element={<Delstatsjakt />} />
+          <Route path="/regnejakt" element={<Regnejakt />} />
+          <Route path="/flaggjakt" element={<Flaggjakt />} />
+          <Route path="/sekvensjakt" element={<Sekvensjakt />} />
+          <Route path="/kryptojakt" element={<Kryptojakt />} />
+          <Route path="/vinjakt" element={<Vinjakt />} />
+          <Route path="/norgesjakt" element={<Norgesjakt />} />
+          <Route path="/arstallsjakt" element={<Arstallsjakt />} />
+        </Routes>
+      </Suspense>
       <Analytics />
     </BrowserRouter>
   );
