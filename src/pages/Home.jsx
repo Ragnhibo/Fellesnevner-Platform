@@ -7,59 +7,19 @@ import PageShell from "../components/PageShell";
 
 const GAMES = [
   {
+    slug: "/ordspill",
+    title: "Ordspill",
+    tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
+    color: colors.accent,
+    category: "Ord",
+    available: true,
+  },
+  {
     slug: "/ordjakt",
     title: "Ordjakt",
     tagline: "Gjett det norske ordet på fem bokstaver — seks forsøk.",
     color: colors.mint,
-    available: true,
-  },
-  {
-    slug: "/kodejakt",
-    title: "Kodejakt",
-    tagline: "Knekk fargekoden — logikk, ikke flaks.",
-    color: colors.blue,
-    available: true,
-  },
-  {
-    slug: "/hovedstadsjakt",
-    title: "Hovedstadsjakt",
-    tagline: "Gjett verdens hovedsteder — lær mens du spiller.",
-    color: colors.pink,
-    available: true,
-  },
-  {
-    slug: "/bokstavjakt",
-    title: "Bokstavjakt",
-    tagline: "Finn så mange land og hovedsteder du kan på tid.",
-    color: colors.accent,
-    available: true,
-  },
-  {
-    slug: "/delstatsjakt",
-    title: "Delstatsjakt",
-    tagline: "Lær USAs 50 delstater, hovedsteder og plassering.",
-    color: colors.mint,
-    available: true,
-  },
-  {
-    slug: "/regnejakt",
-    title: "Regnejakt",
-    tagline: "Løs så mange regnestykker du kan på 60 sekunder.",
-    color: colors.blue,
-    available: true,
-  },
-  {
-    slug: "/flaggjakt",
-    title: "Flaggjakt",
-    tagline: "Gjett landet ut fra flagget.",
-    color: colors.pink,
-    available: true,
-  },
-  {
-    slug: "/sekvensjakt",
-    title: "Sekvensjakt",
-    tagline: "Finn neste tall i rekken.",
-    color: colors.accent,
+    category: "Ord",
     available: true,
   },
   {
@@ -67,13 +27,39 @@ const GAMES = [
     title: "Kryptojakt",
     tagline: "Kryptiske hint — anagram og skjulte ord.",
     color: colors.mint,
+    category: "Ord",
     available: true,
   },
   {
-    slug: "/vinjakt",
-    title: "Vinjakt",
-    tagline: "Vinregioner, druer og vinord.",
+    slug: "/hovedstadsjakt",
+    title: "Hovedstadsjakt",
+    tagline: "Gjett verdens hovedsteder — lær mens du spiller.",
     color: colors.pink,
+    category: "Geografi",
+    available: true,
+  },
+  {
+    slug: "/bokstavjakt",
+    title: "Bokstavjakt",
+    tagline: "Finn så mange land og hovedsteder du kan på tid.",
+    color: colors.accent,
+    category: "Geografi",
+    available: true,
+  },
+  {
+    slug: "/delstatsjakt",
+    title: "Delstatsjakt",
+    tagline: "Lær USAs 50 delstater, hovedsteder og plassering.",
+    color: colors.mint,
+    category: "Geografi",
+    available: true,
+  },
+  {
+    slug: "/flaggjakt",
+    title: "Flaggjakt",
+    tagline: "Gjett landet ut fra flagget.",
+    color: colors.pink,
+    category: "Geografi",
     available: true,
   },
   {
@@ -81,6 +67,41 @@ const GAMES = [
     title: "Norgesjakt",
     tagline: "Fylker og norgesfakta.",
     color: colors.mint,
+    category: "Geografi",
+    isNew: true,
+    available: true,
+  },
+  {
+    slug: "/kodejakt",
+    title: "Kodejakt",
+    tagline: "Knekk fargekoden — logikk, ikke flaks.",
+    color: colors.blue,
+    category: "Tall & logikk",
+    available: true,
+  },
+  {
+    slug: "/regnejakt",
+    title: "Regnejakt",
+    tagline: "Løs så mange regnestykker du kan på 60 sekunder.",
+    color: colors.blue,
+    category: "Tall & logikk",
+    available: true,
+  },
+  {
+    slug: "/sekvensjakt",
+    title: "Sekvensjakt",
+    tagline: "Finn neste tall i rekken.",
+    color: colors.accent,
+    category: "Tall & logikk",
+    available: true,
+  },
+  {
+    slug: "/vinjakt",
+    title: "Vinjakt",
+    tagline: "Vinregioner, druer og vinord.",
+    color: colors.pink,
+    category: "Allmennkunnskap",
+    isNew: true,
     available: true,
   },
   {
@@ -88,20 +109,18 @@ const GAMES = [
     title: "Årstallsjakt",
     tagline: "Gjett årstall og sorter hendelser kronologisk.",
     color: colors.blue,
-    available: true,
-  },
-  {
-    slug: "/ordspill",
-    title: "Ordspill",
-    tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
-    color: colors.accent,
+    category: "Allmennkunnskap",
+    isNew: true,
     available: true,
   },
 ];
 
+const CATEGORY_ORDER = ["Ord", "Geografi", "Tall & logikk", "Allmennkunnskap"];
+
 function GameCard({ game }) {
   const content = (
     <>
+      {game.isNew && <div style={styles.newBadge}>Nytt</div>}
       <div style={{ ...styles.cardDot, background: game.color }} />
       <div style={styles.cardTitle}>{game.title}</div>
       <div style={styles.cardTagline}>{game.tagline}</div>
@@ -152,11 +171,20 @@ export default function Home() {
         </div>
       </div>
 
-      <div style={styles.grid}>
-        {GAMES.map((g) => (
-          <GameCard key={g.title} game={g} />
-        ))}
-      </div>
+      {CATEGORY_ORDER.map((cat) => {
+        const gamesInCat = GAMES.filter((g) => g.category === cat);
+        if (gamesInCat.length === 0) return null;
+        return (
+          <div key={cat} style={styles.categorySection}>
+            <h2 style={styles.categoryTitle}>{cat}</h2>
+            <div style={styles.grid}>
+              {gamesInCat.map((g) => (
+                <GameCard key={g.title} game={g} />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </PageShell>
   );
 }
@@ -194,14 +222,38 @@ const styles = {
     background: "transparent",
     cursor: "pointer",
   },
+  categorySection: { marginTop: 28 },
+  categoryTitle: {
+    fontFamily: "'Kalam', cursive",
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#B9C4B4",
+    marginBottom: 10,
+    paddingBottom: 6,
+    borderBottom: "1.5px dashed rgba(237,237,224,0.2)",
+  },
+  newBadge: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    background: "rgba(232,193,90,0.18)",
+    color: "#E8C15A",
+    fontSize: 10,
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    borderRadius: 5,
+    padding: "3px 7px",
+    fontFamily: "'IBM Plex Sans', sans-serif",
+  },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
     gap: 14,
-    marginTop: 8,
   },
   card: {
     display: "block",
+    position: "relative",
     border: "2px dashed rgba(237,237,224,0.35)",
     borderRadius: "10px 7px 9px 6px",
     padding: "20px 18px",
