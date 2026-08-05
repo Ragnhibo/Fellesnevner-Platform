@@ -77,6 +77,20 @@ const GAMES = [
     available: true,
   },
   {
+    slug: "/norgesjakt",
+    title: "Norgesjakt",
+    tagline: "Fylker og norgesfakta.",
+    color: colors.mint,
+    available: true,
+  },
+  {
+    slug: "/arstallsjakt",
+    title: "Årstallsjakt",
+    tagline: "Gjett årstall og sorter hendelser kronologisk.",
+    color: colors.blue,
+    available: true,
+  },
+  {
     slug: "/ordspill",
     title: "Ordspill",
     tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",

@@ -114,6 +114,26 @@ const BOARDS = [
     unit: " riktige",
     showTime: true,
   },
+  {
+    slug: "/norgesjakt",
+    title: "Norgesjakt",
+    game: "norgesjakt",
+    difficulties: STANDARD_DIFF,
+    initialDifficulty: "middels",
+    ascending: false,
+    unit: " riktige",
+    showTime: true,
+  },
+  {
+    slug: "/arstallsjakt",
+    title: "Årstallsjakt",
+    game: "arstallsjakt",
+    difficulties: STANDARD_DIFF,
+    initialDifficulty: "middels",
+    ascending: false,
+    unit: " riktige",
+    showTime: true,
+  },
 ];
 
 export default function Topplister() {
