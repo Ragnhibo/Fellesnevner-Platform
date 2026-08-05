@@ -26,15 +26,34 @@ export const FYLKER = [
 // that aren't seriously contested (deliberately using "sørligste punkt
 // på fastlandet" (Lindesnes) rather than the popular-but-technically-
 // wrong Nordkapp-is-the-northernmost-point claim, for instance).
+//
+// Each fact has a `pool` tag (fjell, elv, innsjø, etc.) — wrong-answer
+// options for multiple choice are drawn from DECOY_POOL[pool], so a
+// question about the highest mountain only ever offers other real
+// mountains as wrong answers, not an unrelated lake or city name.
 export const FACTS = [
-  { question: "Norges høyeste fjell", answer: "Galdhøpiggen", common: true },
-  { question: "Norges lengste elv", answer: "Glomma", common: true },
-  { question: "Norges største innsjø", answer: "Mjøsa", common: true },
-  { question: "Norges dypeste innsjø", answer: "Hornindalsvatnet", common: false },
-  { question: "Norges sørligste punkt på fastlandet", answer: "Lindesnes", common: true },
-  { question: "Norges lengste og dypeste fjord", answer: "Sognefjorden", common: true },
-  { question: "Norges nest største by", answer: "Bergen", common: true },
-  { question: "Norges lengste veitunnel", answer: "Lærdalstunnelen", common: false },
-  { question: "Trolltunga ligger i hvilken kommune", answer: "Odda", common: false },
-  { question: "Norges største øy (utenom Svalbard)", answer: "Hinnøya", common: false },
+  { question: "Norges høyeste fjell", answer: "Galdhøpiggen", pool: "fjell", common: true },
+  { question: "Norges lengste elv", answer: "Glomma", pool: "elv", common: true },
+  { question: "Norges største innsjø", answer: "Mjøsa", pool: "innsjo", common: true },
+  { question: "Norges dypeste innsjø", answer: "Hornindalsvatnet", pool: "innsjo", common: false },
+  { question: "Norges sørligste punkt på fastlandet", answer: "Lindesnes", pool: "punkt", common: true },
+  { question: "Norges lengste og dypeste fjord", answer: "Sognefjorden", pool: "fjord", common: true },
+  { question: "Norges nest største by", answer: "Bergen", pool: "by", common: true },
+  { question: "Norges lengste veitunnel", answer: "Lærdalstunnelen", pool: "tunnel", common: false },
+  { question: "Trolltunga ligger i hvilken kommune", answer: "Odda", pool: "kommune", common: false },
+  { question: "Norges største øy (utenom Svalbard)", answer: "Hinnøya", pool: "oy", common: false },
 ];
+
+// Real Norwegian names for each pool, used purely as multiple-choice
+// decoys — plausible, same-category, but wrong for that question.
+export const DECOY_POOL = {
+  fjell: ["Glittertind", "Snøhetta", "Store Skagastølstind"],
+  elv: ["Gaula", "Numedalslågen", "Tana"],
+  innsjo: ["Femunden", "Røssvatnet", "Randsfjorden"],
+  punkt: ["Nordkapp", "Stad", "Kinnarodden"],
+  fjord: ["Hardangerfjorden", "Geirangerfjorden", "Trondheimsfjorden"],
+  by: ["Trondheim", "Stavanger", "Kristiansand"],
+  tunnel: ["Gudvangatunnelen", "Ryfylketunnelen", "Fannefjordtunnelen"],
+  kommune: ["Voss", "Ulvik", "Eidfjord"],
+  oy: ["Senja", "Langøya", "Magerøya"],
+};
