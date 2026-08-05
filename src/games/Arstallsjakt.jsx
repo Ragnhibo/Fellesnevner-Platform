@@ -63,12 +63,16 @@ function buildSort(pool, cfg) {
 function buildRound(cfg) {
   const pool = getPool(cfg.pool);
   const items = [];
+  const usedEvents = new Set();
   for (let i = 0; i < ROUND_LENGTH; i++) {
     const useSort = cfg.kinds.includes("sort") && cfg.kinds.length > 1 ? i % 3 === 2 : cfg.kinds[0] === "sort";
     if (useSort && cfg.kinds.includes("sort")) {
       items.push(buildSort(pool, cfg));
     } else {
-      const entry = pool[Math.floor(Math.random() * pool.length)];
+      const available = pool.filter((e) => !usedEvents.has(e.event));
+      const candidates = available.length > 0 ? available : pool;
+      const entry = candidates[Math.floor(Math.random() * candidates.length)];
+      usedEvents.add(entry.event);
       items.push(buildGuessYear(entry, pool, cfg));
     }
   }
