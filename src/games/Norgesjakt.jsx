@@ -2,7 +2,7 @@ import React, { useState, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { RotateCcw, Share2 } from "lucide-react";
 import { shared, colors, usePageTitle, copyToClipboard, normalizeText } from "../theme";
-import { FYLKER, FACTS } from "../data/norwayData";
+import { FYLKER, FACTS, DECOY_POOL } from "../data/norwayData";
 import PageShell from "../components/PageShell";
 import Leaderboard, { SaveScoreRow } from "../components/Leaderboard";
 
@@ -57,8 +57,8 @@ function buildItem(category, entry, pools, type) {
   const prompt = `${entry.question}?`;
   const answer = entry.answer;
   if (type === "text") return { category, prompt, answer };
-  const wrongs = shuffle(pools.facts.filter((e) => e.answer !== entry.answer)).slice(0, 3);
-  const options = shuffle([answer, ...wrongs.map((w) => w.answer)]);
+  const wrongs = DECOY_POOL[entry.pool] || [];
+  const options = shuffle([answer, ...wrongs]);
   return { category, prompt, answer, options };
 }
 
