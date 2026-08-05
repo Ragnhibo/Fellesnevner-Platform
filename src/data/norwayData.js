@@ -25,35 +25,49 @@ export const FYLKER = [
 // Well-established Norwegian geography/history facts — kept to figures
 // that aren't seriously contested (deliberately using "sørligste punkt
 // på fastlandet" (Lindesnes) rather than the popular-but-technically-
-// wrong Nordkapp-is-the-northernmost-point claim, for instance).
+// wrong Nordkapp-is-the-northernmost-point claim, for instance — and
+// including the correct northernmost point, Kinnarodden, as its own
+// question precisely to correct that popular misconception).
 //
-// Each fact has a `pool` tag (fjell, elv, innsjø, etc.) — wrong-answer
-// options for multiple choice are drawn from DECOY_POOL[pool], so a
-// question about the highest mountain only ever offers other real
-// mountains as wrong answers, not an unrelated lake or city name.
+// Each fact has a `pool` tag — wrong-answer options for multiple choice
+// are drawn dynamically from CATEGORY_POOLS[pool] (excluding the correct
+// answer itself), so a question about the highest mountain only ever
+// offers other real mountains as wrong answers, never an unrelated lake
+// or city name.
 export const FACTS = [
   { question: "Norges høyeste fjell", answer: "Galdhøpiggen", pool: "fjell", common: true },
+  { question: "Norges nest høyeste fjell", answer: "Glittertind", pool: "fjell", common: false },
   { question: "Norges lengste elv", answer: "Glomma", pool: "elv", common: true },
   { question: "Norges største innsjø", answer: "Mjøsa", pool: "innsjo", common: true },
   { question: "Norges dypeste innsjø", answer: "Hornindalsvatnet", pool: "innsjo", common: false },
   { question: "Norges sørligste punkt på fastlandet", answer: "Lindesnes", pool: "punkt", common: true },
+  { question: "Norges nordligste punkt på fastlandet (ikke Nordkapp!)", answer: "Kinnarodden", pool: "punkt", common: false },
   { question: "Norges lengste og dypeste fjord", answer: "Sognefjorden", pool: "fjord", common: true },
+  { question: "Fjorden kjent for Trollstigen, cruiseturisme og UNESCO-status", answer: "Geirangerfjorden", pool: "fjord", common: true },
   { question: "Norges nest største by", answer: "Bergen", pool: "by", common: true },
+  { question: "Norges tredje største by", answer: "Trondheim", pool: "by", common: false },
+  { question: "Norges eldste by", answer: "Tønsberg", pool: "by", common: false },
   { question: "Norges lengste veitunnel", answer: "Lærdalstunnelen", pool: "tunnel", common: false },
   { question: "Trolltunga ligger i hvilken kommune", answer: "Odda", pool: "kommune", common: false },
   { question: "Norges største øy (utenom Svalbard)", answer: "Hinnøya", pool: "oy", common: false },
+  { question: "Norges høyeste foss", answer: "Vinnufossen", pool: "foss", common: false },
+  { question: "Norges lengste bru", answer: "Hålogalandsbrua", pool: "bru", common: false },
+  { question: "Norges mest besøkte nasjonalpark", answer: "Jotunheimen", pool: "park", common: true },
 ];
 
-// Real Norwegian names for each pool, used purely as multiple-choice
-// decoys — plausible, same-category, but wrong for that question.
-export const DECOY_POOL = {
-  fjell: ["Glittertind", "Snøhetta", "Store Skagastølstind"],
-  elv: ["Gaula", "Numedalslågen", "Tana"],
-  innsjo: ["Femunden", "Røssvatnet", "Randsfjorden"],
-  punkt: ["Nordkapp", "Stad", "Kinnarodden"],
-  fjord: ["Hardangerfjorden", "Geirangerfjorden", "Trondheimsfjorden"],
-  by: ["Trondheim", "Stavanger", "Kristiansand"],
-  tunnel: ["Gudvangatunnelen", "Ryfylketunnelen", "Fannefjordtunnelen"],
-  kommune: ["Voss", "Ulvik", "Eidfjord"],
-  oy: ["Senja", "Langøya", "Magerøya"],
+// Real Norwegian names per category, used both as the correct answers
+// above and as the pool multiple-choice decoys are drawn from.
+export const CATEGORY_POOLS = {
+  fjell: ["Galdhøpiggen", "Glittertind", "Snøhetta", "Store Skagastølstind", "Skarstind"],
+  elv: ["Glomma", "Gaula", "Numedalslågen", "Tana", "Otra"],
+  innsjo: ["Mjøsa", "Hornindalsvatnet", "Femunden", "Røssvatnet", "Randsfjorden", "Tyrifjorden"],
+  punkt: ["Lindesnes", "Kinnarodden", "Nordkapp", "Stad"],
+  fjord: ["Sognefjorden", "Geirangerfjorden", "Hardangerfjorden", "Trondheimsfjorden", "Oslofjorden"],
+  by: ["Bergen", "Trondheim", "Tønsberg", "Stavanger", "Kristiansand", "Tromsø", "Ålesund"],
+  tunnel: ["Lærdalstunnelen", "Gudvangatunnelen", "Ryfylketunnelen", "Fannefjordtunnelen"],
+  kommune: ["Odda", "Voss", "Ulvik", "Eidfjord"],
+  oy: ["Hinnøya", "Senja", "Langøya", "Magerøya"],
+  foss: ["Vinnufossen", "Mardalsfossen", "Vøringsfossen", "Langfossen"],
+  bru: ["Hålogalandsbrua", "Nordhordlandsbrua", "Bergsøysundbrua", "Gjemnessundbrua"],
+  park: ["Jotunheimen", "Rondane", "Hardangervidda", "Dovrefjell"],
 };
