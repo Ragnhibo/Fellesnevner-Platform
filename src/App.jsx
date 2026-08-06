@@ -18,6 +18,7 @@ const Kryptojakt = lazy(() => import("./games/Kryptojakt"));
 const Vinjakt = lazy(() => import("./games/Vinjakt"));
 const Norgesjakt = lazy(() => import("./games/Norgesjakt"));
 const Arstallsjakt = lazy(() => import("./games/Arstallsjakt"));
+const Gjettejakt = lazy(() => import("./games/Gjettejakt"));
 
 function LoadingFallback() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/vinjakt" element={<Vinjakt />} />
           <Route path="/norgesjakt" element={<Norgesjakt />} />
           <Route path="/arstallsjakt" element={<Arstallsjakt />} />
+          <Route path="/gjettejakt" element={<Gjettejakt />} />
         </Routes>
       </Suspense>
       <Analytics />
