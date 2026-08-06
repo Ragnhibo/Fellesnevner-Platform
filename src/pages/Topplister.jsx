@@ -135,6 +135,16 @@ const BOARDS = [
     unit: " riktige",
     showTime: true,
   },
+  {
+    slug: "/gjettejakt",
+    title: "Gjettejakt",
+    game: "gjettejakt",
+    difficulties: STANDARD_DIFF,
+    initialDifficulty: "middels",
+    ascending: false,
+    unit: " poeng",
+    showTime: true,
+  },
 ];
 
 export default function Topplister() {
