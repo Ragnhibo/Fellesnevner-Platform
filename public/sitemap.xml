@@ -71,6 +71,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://fellesnevner.no/gjettejakt</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://fellesnevner.no/topplister</loc>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
