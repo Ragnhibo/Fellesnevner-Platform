@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Trophy, X } from "lucide-react";
 import { supabase } from "../supabaseClient";
 import { colors } from "../theme";
+import { containsBlockedWord } from "../data/blockedWords";
 
 // Inline nickname input + save button, meant to sit inside a game's
 // end-of-round banner right after the result is known. Renders nothing
@@ -16,6 +17,10 @@ export function SaveScoreRow({ game, difficulty, score, timeSeconds }) {
 
   const save = async () => {
     if (!nickname.trim() || saving) return;
+    if (containsBlockedWord(nickname)) {
+      setErrorMsg("Velg et annet kallenavn — dette vises offentlig på topplisten.");
+      return;
+    }
     setSaving(true);
     setErrorMsg("");
     const payload = {
