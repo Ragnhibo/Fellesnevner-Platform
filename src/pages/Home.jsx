@@ -175,6 +175,9 @@ export default function Home() {
           <Link to="/topplister" style={styles.headerLink}>
             <Trophy size={14} style={{ marginRight: 5 }} /> Topplister
           </Link>
+          <Link to="/barn" style={styles.headerLink}>
+            🎒 For barn
+          </Link>
           <button style={styles.headerLinkBtn} className="rt-btn" onClick={shareSite}>
             <Share2 size={14} style={{ marginRight: 5 }} /> {shareCopied ? "Kopiert!" : "Del med venner"}
           </button>
