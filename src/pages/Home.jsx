@@ -14,14 +14,16 @@ const GAMES = [
     category: "Ord",
     available: true,
   },
-  {
-    slug: "/ordspill",
-    title: "Ordspill",
-    tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
-    color: colors.accent,
-    category: "Ord",
-    available: true,
-  },
+  // Midlertidig skjult fra forsiden — /ordspill fungerer fortsatt for de
+  // som har direkte lenke. Fjern kommentaren under for å vise kortet igjen.
+  // {
+  //   slug: "/ordspill",
+  //   title: "Ordspill",
+  //   tagline: "Finn fellesnevneren i fire kategorier blant seksten ord.",
+  //   color: colors.accent,
+  //   category: "Ord",
+  //   available: true,
+  // },
   {
     slug: "/kryptojakt",
     title: "Kryptojakt",
