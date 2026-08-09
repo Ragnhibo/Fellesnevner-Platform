@@ -5,6 +5,8 @@ import { kidColors, kidShared } from "../themeKids";
 
 const GAMES_1_3 = [
   { slug: "/barn/regning", title: "Regnejakt", emoji: "🧮", tagline: "Legg sammen og trekk fra tall", color: kidColors.sun },
+  { slug: "/barn/former", title: "Formjakt", emoji: "🔷", tagline: "Kjenn igjen formene", color: kidColors.sky },
+  { slug: "/barn/klokka", title: "Klokkejakt", emoji: "🕐", tagline: "Hva er klokka?", color: kidColors.tangerine },
 ];
 
 export default function BarnHome() {
