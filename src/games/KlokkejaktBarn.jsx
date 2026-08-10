@@ -66,37 +66,48 @@ function ClockFace({ hour, minute, size = 200 }) {
   );
 }
 
-function buildProblem(level) {
+function allTimesFor(level) {
   const cfg = LEVELS[level];
-  const hour = Math.floor(Math.random() * 12) + 1;
-  const minute = cfg.minutes[Math.floor(Math.random() * cfg.minutes.length)];
-  const answer = formatTime(hour, minute);
-
-  const wrongs = new Set();
-  while (wrongs.size < 3) {
-    const h = Math.floor(Math.random() * 12) + 1;
-    const m = cfg.minutes[Math.floor(Math.random() * cfg.minutes.length)];
-    const t = formatTime(h, m);
-    if (t !== answer) wrongs.add(t);
+  const times = [];
+  for (let h = 1; h <= 12; h++) {
+    for (const m of cfg.minutes) {
+      times.push({ hour: h, minute: m, answer: formatTime(h, m) });
+    }
   }
-  const options = shuffle([answer, ...wrongs]);
-  return { hour, minute, answer, options };
+  return times;
+}
+
+function buildOneProblem(level, target, allTimes) {
+  const wrongs = shuffle(allTimes.filter((t) => t.answer !== target.answer)).slice(0, 3);
+  const options = shuffle([target.answer, ...wrongs.map((w) => w.answer)]);
+  return { hour: target.hour, minute: target.minute, answer: target.answer, options };
+}
+
+// Every possible time for a level is enumerated once, shuffled, and the
+// round takes the first ROUND_LENGTH of them — since there are always
+// more possible times than questions in a round, no time can repeat.
+function buildRound(level) {
+  const allTimes = allTimesFor(level);
+  const targets = shuffle(allTimes).slice(0, ROUND_LENGTH);
+  return targets.map((t) => buildOneProblem(level, t, allTimes));
 }
 
 export default function KlokkejaktBarn() {
   usePageTitle("Klokkejakt for barn");
   const [level, setLevel] = useState("trinn1");
   const [qIndex, setQIndex] = useState(0);
-  const [problem, setProblem] = useState(() => buildProblem("trinn1"));
+  const [round, setRound] = useState(() => buildRound("trinn1"));
   const [feedback, setFeedback] = useState(null);
   const [wrongPick, setWrongPick] = useState(null);
   const [stars, setStars] = useState(0);
   const [status, setStatus] = useState("playing");
 
+  const problem = round[qIndex];
+
   const changeLevel = (lvl) => {
     setLevel(lvl);
     setQIndex(0);
-    setProblem(buildProblem(lvl));
+    setRound(buildRound(lvl));
     setFeedback(null);
     setWrongPick(null);
     setStars(0);
@@ -117,7 +128,6 @@ export default function KlokkejaktBarn() {
           setStatus("done");
         } else {
           setQIndex((i) => i + 1);
-          setProblem(buildProblem(level));
         }
       }, 800);
     } else {

@@ -53,30 +53,17 @@ function shuffle(arr) {
   return a;
 }
 
-function buildProblem(level) {
-  if (level === "trinn1") {
-    const pool = WORD_TO_PICTURE;
-    const entry = pool[Math.floor(Math.random() * pool.length)];
-    const distractors = shuffle(pool.filter((e) => e.text !== entry.text)).slice(0, 3);
-    return {
-      kind: "picture",
-      prompt: entry.text,
-      answer: entry.emoji,
-      options: shuffle([entry.emoji, ...distractors.map((d) => d.emoji)]),
-    };
-  }
-  if (level === "trinn2") {
-    const pool = PHRASE_TO_PICTURE;
-    const entry = pool[Math.floor(Math.random() * pool.length)];
-    const distractors = shuffle(pool.filter((e) => e.text !== entry.text)).slice(0, 3);
-    return {
-      kind: "picture",
-      prompt: entry.text,
-      answer: entry.emoji,
-      options: shuffle([entry.emoji, ...distractors.map((d) => d.emoji)]),
-    };
-  }
-  const entry = CLOZE[Math.floor(Math.random() * CLOZE.length)];
+function buildOnePictureProblem(entry, pool) {
+  const distractors = shuffle(pool.filter((e) => e.text !== entry.text)).slice(0, 3);
+  return {
+    kind: "picture",
+    prompt: entry.text,
+    answer: entry.emoji,
+    options: shuffle([entry.emoji, ...distractors.map((d) => d.emoji)]),
+  };
+}
+
+function buildOneClozeProblem(entry) {
   return {
     kind: "cloze",
     before: entry.before,
@@ -86,20 +73,36 @@ function buildProblem(level) {
   };
 }
 
+function buildRound(level) {
+  if (level === "trinn1") {
+    return shuffle(WORD_TO_PICTURE)
+      .slice(0, ROUND_LENGTH)
+      .map((e) => buildOnePictureProblem(e, WORD_TO_PICTURE));
+  }
+  if (level === "trinn2") {
+    return shuffle(PHRASE_TO_PICTURE)
+      .slice(0, ROUND_LENGTH)
+      .map((e) => buildOnePictureProblem(e, PHRASE_TO_PICTURE));
+  }
+  return shuffle(CLOZE).slice(0, ROUND_LENGTH).map(buildOneClozeProblem);
+}
+
 export default function LeseJaktBarn() {
   usePageTitle("Lesejakt for barn");
   const [level, setLevel] = useState("trinn1");
   const [qIndex, setQIndex] = useState(0);
-  const [problem, setProblem] = useState(() => buildProblem("trinn1"));
+  const [round, setRound] = useState(() => buildRound("trinn1"));
   const [feedback, setFeedback] = useState(null);
   const [wrongPick, setWrongPick] = useState(null);
   const [stars, setStars] = useState(0);
   const [status, setStatus] = useState("playing");
 
+  const problem = round[qIndex];
+
   const changeLevel = (lvl) => {
     setLevel(lvl);
     setQIndex(0);
-    setProblem(buildProblem(lvl));
+    setRound(buildRound(lvl));
     setFeedback(null);
     setWrongPick(null);
     setStars(0);
@@ -120,7 +123,6 @@ export default function LeseJaktBarn() {
           setStatus("done");
         } else {
           setQIndex((i) => i + 1);
-          setProblem(buildProblem(level));
         }
       }, 1000);
     } else {

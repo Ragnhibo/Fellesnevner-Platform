@@ -50,18 +50,21 @@ function shuffle(arr) {
   return a;
 }
 
-function buildProblem(level) {
-  const pool = WORDS[level];
-  const entry = pool[Math.floor(Math.random() * pool.length)];
+function buildOneProblem(entry) {
   const tiles = entry.word.split("").map((letter, i) => ({ id: `${i}-${letter}`, letter }));
   return { word: entry.word, emoji: entry.emoji, tiles: shuffle(tiles) };
+}
+
+function buildRound(level) {
+  const entries = shuffle(WORDS[level]).slice(0, ROUND_LENGTH);
+  return entries.map(buildOneProblem);
 }
 
 export default function StaveJaktBarn() {
   usePageTitle("Stavejakt for barn");
   const [level, setLevel] = useState("trinn1");
   const [qIndex, setQIndex] = useState(0);
-  const [problem, setProblem] = useState(() => buildProblem("trinn1"));
+  const [round, setRound] = useState(() => buildRound("trinn1"));
   const [filled, setFilled] = useState([]);
   const [usedIds, setUsedIds] = useState(new Set());
   const [shakeId, setShakeId] = useState(null);
@@ -69,10 +72,12 @@ export default function StaveJaktBarn() {
   const [stars, setStars] = useState(0);
   const [status, setStatus] = useState("playing");
 
+  const problem = round[qIndex];
+
   const changeLevel = (lvl) => {
     setLevel(lvl);
     setQIndex(0);
-    setProblem(buildProblem(lvl));
+    setRound(buildRound(lvl));
     setFilled([]);
     setUsedIds(new Set());
     setShakeId(null);
@@ -101,7 +106,6 @@ export default function StaveJaktBarn() {
             setStatus("done");
           } else {
             setQIndex((i) => i + 1);
-            setProblem(buildProblem(level));
           }
         }, 1100);
       }

@@ -86,29 +86,54 @@ function ShapeIcon({ type, color, size = 64 }) {
 
 const ICON_COLORS = [kidColors.sun, kidColors.grass, kidColors.sky, kidColors.berry, kidColors.tangerine];
 
-function buildProblem(level) {
+function buildOneProblem(level, target) {
   const cfg = LEVELS[level];
-  const target = cfg.shapes[Math.floor(Math.random() * cfg.shapes.length)];
   const distractors = shuffle(cfg.shapes.filter((s) => s !== target)).slice(0, 3);
   const optionShapes = shuffle([target, ...distractors]);
   const optionColors = optionShapes.map(() => ICON_COLORS[Math.floor(Math.random() * ICON_COLORS.length)]);
   return { mode: cfg.mode, target, optionShapes, optionColors };
 }
 
+// Deals targets from a shuffled deck of the level's shapes, reshuffling a
+// fresh deck only once the current one runs out — guarantees no shape
+// repeats until every shape has appeared, however long the round is. Also
+// guards the seam between one deck and the next so two deals in a row are
+// never the same shape.
+function buildRound(level) {
+  const cfg = LEVELS[level];
+  let deck = [];
+  const targets = [];
+  for (let i = 0; i < ROUND_LENGTH; i++) {
+    if (deck.length === 0) {
+      deck = shuffle(cfg.shapes);
+      const prev = targets[targets.length - 1];
+      if (prev !== undefined && deck[deck.length - 1] === prev && deck.length > 1) {
+        // swap the about-to-be-dealt card with another so we don't repeat
+        const swapIdx = deck.length - 2;
+        [deck[deck.length - 1], deck[swapIdx]] = [deck[swapIdx], deck[deck.length - 1]];
+      }
+    }
+    targets.push(deck.pop());
+  }
+  return targets.map((t) => buildOneProblem(level, t));
+}
+
 export default function FormjaktBarn() {
   usePageTitle("Formjakt for barn");
   const [level, setLevel] = useState("trinn1");
   const [qIndex, setQIndex] = useState(0);
-  const [problem, setProblem] = useState(() => buildProblem("trinn1"));
+  const [round, setRound] = useState(() => buildRound("trinn1"));
   const [feedback, setFeedback] = useState(null); // 'correct' | 'wrong' | null
   const [wrongPick, setWrongPick] = useState(null);
   const [stars, setStars] = useState(0);
   const [status, setStatus] = useState("playing");
 
+  const problem = round[qIndex];
+
   const changeLevel = (lvl) => {
     setLevel(lvl);
     setQIndex(0);
-    setProblem(buildProblem(lvl));
+    setRound(buildRound(lvl));
     setFeedback(null);
     setWrongPick(null);
     setStars(0);
@@ -129,7 +154,6 @@ export default function FormjaktBarn() {
           setStatus("done");
         } else {
           setQIndex((i) => i + 1);
-          setProblem(buildProblem(level));
         }
       }, 800);
     } else {
