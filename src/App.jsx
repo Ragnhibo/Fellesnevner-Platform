@@ -23,6 +23,8 @@ const BarnHome = lazy(() => import("./pages/BarnHome"));
 const RegnejaktBarn = lazy(() => import("./games/RegnejaktBarn"));
 const FormjaktBarn = lazy(() => import("./games/FormjaktBarn"));
 const KlokkejaktBarn = lazy(() => import("./games/KlokkejaktBarn"));
+const StaveJaktBarn = lazy(() => import("./games/StaveJaktBarn"));
+const LeseJaktBarn = lazy(() => import("./games/LeseJaktBarn"));
 
 function LoadingFallback() {
   return (
@@ -68,6 +70,8 @@ export default function App() {
           <Route path="/barn/regning" element={<RegnejaktBarn />} />
           <Route path="/barn/former" element={<FormjaktBarn />} />
           <Route path="/barn/klokka" element={<KlokkejaktBarn />} />
+          <Route path="/barn/staving" element={<StaveJaktBarn />} />
+          <Route path="/barn/lesing" element={<LeseJaktBarn />} />
         </Routes>
       </Suspense>
       <Analytics />
