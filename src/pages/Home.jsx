@@ -123,6 +123,15 @@ const GAMES = [
     isNew: true,
     available: true,
   },
+  {
+    slug: "/presidentjakt",
+    title: "Presidentjakt",
+    tagline: "USAs presidenter — hendelser, rekkefølge og fakta.",
+    color: colors.mint,
+    category: "Allmennkunnskap",
+    isNew: true,
+    available: true,
+  },
 ];
 
 const CATEGORY_ORDER = ["Ord", "Geografi", "Tall & logikk", "Allmennkunnskap"];

@@ -19,6 +19,7 @@ const Vinjakt = lazy(() => import("./games/Vinjakt"));
 const Norgesjakt = lazy(() => import("./games/Norgesjakt"));
 const Arstallsjakt = lazy(() => import("./games/Arstallsjakt"));
 const Gjettejakt = lazy(() => import("./games/Gjettejakt"));
+const Presidentjakt = lazy(() => import("./games/Presidentjakt"));
 const BarnHome = lazy(() => import("./pages/BarnHome"));
 const RegnejaktBarn = lazy(() => import("./games/RegnejaktBarn"));
 const FormjaktBarn = lazy(() => import("./games/FormjaktBarn"));
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="/norgesjakt" element={<Norgesjakt />} />
           <Route path="/arstallsjakt" element={<Arstallsjakt />} />
           <Route path="/gjettejakt" element={<Gjettejakt />} />
+          <Route path="/presidentjakt" element={<Presidentjakt />} />
           <Route path="/barn" element={<BarnHome />} />
           <Route path="/barn/regning" element={<RegnejaktBarn />} />
           <Route path="/barn/former" element={<FormjaktBarn />} />

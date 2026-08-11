@@ -136,6 +136,16 @@ const BOARDS = [
     showTime: true,
   },
   {
+    slug: "/presidentjakt",
+    title: "Presidentjakt",
+    game: "presidentjakt",
+    difficulties: STANDARD_DIFF,
+    initialDifficulty: "middels",
+    ascending: false,
+    unit: " riktige",
+    showTime: true,
+  },
+  {
     slug: "/gjettejakt",
     title: "Gjettejakt",
     game: "gjettejakt",
