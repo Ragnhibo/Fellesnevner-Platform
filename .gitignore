@@ -1,0 +1,23 @@
+# Dependencies — regenerate with `npm install`, never commit
+node_modules/
+
+# Secrets — API keys and similar must stay off GitHub
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+dist-ssr/
+
+# Vite / tooling caches
+.vite/
+*.local
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# macOS
+.DS_Store
