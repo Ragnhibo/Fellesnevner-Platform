@@ -70,7 +70,6 @@ const GAMES = [
     tagline: "Fylker og norgesfakta.",
     color: colors.mint,
     category: "Geografi",
-    isNew: true,
     available: true,
   },
   {
@@ -103,7 +102,6 @@ const GAMES = [
     tagline: "Vinregioner, druer og vinord.",
     color: colors.pink,
     category: "Allmennkunnskap",
-    isNew: true,
     available: true,
   },
   {
@@ -120,7 +118,6 @@ const GAMES = [
     tagline: "Svaret er alltid et tall mellom 0 og 100.",
     color: colors.accent,
     category: "Allmennkunnskap",
-    isNew: true,
     available: true,
   },
   {
